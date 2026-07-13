@@ -359,8 +359,13 @@ myIdDisplay.style.color = "#888";
 });
 });
 
-const peer = new Peer();
-peer.on('open', (id) => { myIdDisplay.innerText = id; });
+// Eski satır: const peer = new Peer();
+// Yeni kararlı sunucu tanımı:
+const peer = new Peer(undefined, {
+    host: 'peerjs-server.herokuapp.com', // veya kendi kurduğunuz bir peerjs sunucusu
+    secure: true,
+    port: 443
+});
 
 connectBtn.addEventListener('click', () => {
 const friendId = peerIdInput.value.trim();
