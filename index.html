@@ -18,8 +18,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght=300;400;700&display=swap" rel="stylesheet">
 
 <style>
-/* DÜZELTİLDİ: • yerine * kullanıldı */
-• { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Lexend', sans-serif; }
+/* Kesin olarak düzeltildi: * karakteri uygulandı */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Lexend', sans-serif; }
 
 html, body { height: 100%; background: #000; color: #fff; overflow: hidden; }
 body { position: relative; }
@@ -531,15 +531,16 @@ lastSenderNick = null;
 
 const textDiv = document.createElement('div');
 textDiv.className = 'msg-body';
-// DÜZELTİLDİ: Regex syntax düzeltmesi
-textDiv.innerHTML = text.replace(/**(.*?)**/g, '<b>$`1</b>');
+/* Kesin olarak düzeltildi: Regex kaçış karakterleri eklendi */
+textDiv.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
 textDiv.addEventListener('click', () => {
 if (Date.now() - lastCancelTime < 300) return;
 const activeNick = (senderNick && senderNick.trim() !== '') ? senderNick : '';
 replyingTo = { text: text, nick: activeNick, targetId: messageId };
+/* Kesin olarak düzeltildi: Yan yana duran hatalı backtick'ler silindi */
 replyBarText.innerText = finalNick
-? ``${finalNick} kullanıcısına yanıt veriliyor...` : "Mesaja yanıt veriliyor...";
+? `${finalNick} kullanıcısına yanıt veriliyor...` : "Mesaja yanıt veriliyor...";
 replyBar.style.display = 'flex';
 adjustInputHeight();
 messageInput.focus();
