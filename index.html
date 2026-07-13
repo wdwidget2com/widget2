@@ -564,8 +564,19 @@ function adjustInputHeight() {
     chatArea.scrollTop    = chatArea.scrollHeight;
 }
 
-messageInput.addEventListener('input', () => {
+messageInput.addEventListener('input', (e) => {
     adjustInputHeight();
+    
+    // Mobil sanal klavyelerin enter kontrolünü bypass edip input içinde satır atlamasını engellemek için ek koruma (Masaüstü/Tablet Bluetooth için)
+    const isPhoneScreen = window.innerWidth < 768;
+    if (!isPhoneScreen && messageInput.value.endsWith('\n') && !e.inputType?.includes('insertLineBreak')) {
+        // Eğer yanlışlıkla satır eklendiyse ve shift basılı değilse temizle (keydown kaçtıysa yedek mekanizma)
+        if (window.lastKeyEvent && !window.lastKeyEvent.shiftKey && window.lastKeyEvent.key === 'Enter') {
+            messageInput.value = messageInput.value.trim();
+            sendMessage();
+        }
+    }
+
     if (conn && conn.open) {
         if (!isTypingSent) { conn.send({ type: 'typing' }); isTypingSent = true; }
         if (myTypingTimeout) clearTimeout(myTypingTimeout);
@@ -617,21 +628,26 @@ sendBtn.addEventListener('pointerdown', (event) => {
     setTimeout(() => { messageInput.focus(); }, 10);
 });
 
-// Güncellenen Akıllı Klavye/Enter Dinleyicisi
+// Yeni Geliştirilmiş Kesin Çözümlü Klavye Dinleyicisi
 messageInput.addEventListener('keydown', (event) => {
+    window.lastKeyEvent = event; // input eventi için yedek hafıza
+    
     if (event.key === 'Enter') {
-        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        // Sadece dar telefon ekranlarını mobil sanal klavye kabul et.
+        // Tablet geniş ekranları (Masaüstü modu dahil) ve PC'leri masaüstü düzeni say.
+        const isPhoneScreen = window.innerWidth < 768;
         
-        if (isMobile) {
-            // Mobilde normal enter davranışına (alt satıra geçme) izin ver
+        if (isPhoneScreen) {
+            // Sadece akıllı telefonlarda normal sanal klavye gibi alt satıra geçmesine izin ver
             return;
         } else {
-            // Masaüstünde Shift basılı DEĞİLSE mesajı gönder
+            // Samsung Tablet (Bluetooth klavye/DeX) ve Masaüstü PC için kesin tetikleme:
+            // Shift tuşuna basılmıyorsa mesajı anında GÖNDER
             if (!event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
+                event.preventDefault(); // Varsayılan yeni satır açmayı engelle
+                sendMessage(); // Mesajı gönder
             }
-            // Masaüstünde Shift + Enter yapılırsa normal şekilde alt satıra geçer
+            // Shift + Enter kombinasyonunda dokunma, alt satıra geçsin
         }
     }
 });
@@ -653,4 +669,4 @@ if (window.visualViewport) {
 }
 </script>
 </body>
-</html>
+<
