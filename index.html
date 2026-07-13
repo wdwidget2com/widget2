@@ -4,27 +4,181 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Widget2">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Widget2</title>
+<title>W2</title>
 <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 <link rel="icon" href="https://i.ibb.co/XxHR1rxG/logo.png" type="image/png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Lexend',sans-serif}html,body{height:100%;background:#000;color:#fff;overflow:hidden}#setup-panel{position:relative;z-index:10000;padding:12px 15px;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:between;background:#0d0d0d;font-size:14px}#status-badge{font-weight:700;padding:4px 8px;border-radius:4px;font-size:12px;background:#333;color:#aaa}#status-badge.connected{background:#00e676;color:#000}#status-badge.connecting{background:#ffa726;color:#000}#status-badge.disconnected{background:#ff4444;color:#fff}#chat-area{position:absolute;top:50px;left:0;right:0;bottom:80px;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:2px;font-size:18px;line-height:1.4}.msg{overflow-wrap:break-word;word-break:break-word;font-size:15px;padding:6px 0;white-space:pre-wrap;color:#fff;position:relative;background-color:#000;line-height:1.25;transition:background-color .4s ease}.msg:not(.own-msg){background-color:#111;padding:6px 8px}.msg.own-msg{color:#777;padding:6px 8px}.msg-flash{background-color:#333!important}#input-area{position:fixed;bottom:0;left:0;width:100%;min-height:80px;padding:15px;background:#000;border-top:1px solid #222;z-index:9999;display:flex;align-items:flex-end}#input-wrapper{display:flex;width:100%;align-items:flex-end}#nick-input{width:70px;min-width:70px;background:#111;border:1px solid #333;color:#888;padding:13px 5px;font-size:16px;outline:0;text-align:center;border-radius:4px 0 0 4px;border-right:none;height:50px}#send-btn{width:50px;min-width:50px;height:50px;background:#fff;color:#000;border:1px solid #333;border-radius:0 4px 4px 0;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;transition:background .2s}#send-btn:disabled{opacity:.3;cursor:not-allowed}#message-input{flex:1;background:#111;border:1px solid #333;color:#fff;padding:13px 15px;font-size:16px;outline:0;border-radius:0;border-right:none;resize:none;height:50px;max-height:150px;line-height:22px;overflow-y:auto}#message-input:disabled{opacity:.3;cursor:not-allowed}#nick-input:focus,#message-input:focus{border:2px solid #fff!important;box-shadow:0 0 10px rgba(255,255,255,.5);z-index:2}.reply-container{display:flex;flex-direction:row;align-items:stretch;margin-bottom:6px;position:relative;padding-left:2px;gap:8px;cursor:pointer}.reply-line{width:2px;background-color:#444;border-radius:2px;flex-shrink:0}.reply-preview-text{font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;display:flex;align-items:center;line-height:1.4}.msg-body{cursor:pointer}#reply-bar{display:none;background:#111;border-top:1px solid #222;padding:8px 15px;font-size:13px;color:#888;justify-content:space-between;align-items:center;position:fixed;width:100%;z-index:10001}#cancel-reply-btn{cursor:pointer;color:#fff;font-weight:700;padding:0 5px}.reply-nick-badge{background-color:#fff;color:#000;font-weight:700;font-size:10px;padding:2px 6px;border-radius:3px;margin-right:8px;display:inline-block;line-height:1;flex-shrink:0}@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}#typing-indicator{display:flex;position:fixed;left:0;width:100%;z-index:9998;height:26px;padding:0 15px;background:#000;border-top:1px solid #1a1a1a;align-items:center;pointer-events:none}#typing-indicator span{font-size:12px;color:#555;opacity:0;transition:opacity .2s}#typing-indicator span.visible{opacity:1;animation:blink 1.2s ease-in-out infinite}@media (min-width:769px){#send-btn{display:none!important}#message-input{border-radius:0 4px 4px 0!important;border-right:1px solid #333!important}}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Lexend',sans-serif}
+html,body{height:100%;background:#000;color:#fff;overflow:hidden;position:relative}
+#setup-panel{position:relative;z-index:10000;padding:15px;border-bottom:1px solid #222;display:flex;flex-direction:column;gap:10px;background:#000}
+#my-id-display{color:#888;font-size:14px;word-break:break-all;user-select:all;-webkit-user-select:all;cursor:pointer}
+#peer-id-input{background:#111;border:1px solid #333;color:#fff;padding:10px;font-size:16px;outline:none}
+#connect-btn{background:#fff;color:#000;border:none;padding:10px;font-size:16px;cursor:pointer;font-weight:bold}
+#chat-area{position:absolute;top:140px;left:0;right:0;bottom:80px;overflow-y:auto;padding:8px 0;display:none;flex-direction:column;gap:2px;font-size:18px;line-height:1.4}
+.msg{overflow-wrap:break-word;word-break:break-word;font-size:15px;padding:6px 8px;white-space:pre-wrap;color:#fff;background:#111;line-height:1.25;transition:background .4s}
+.msg.own-msg{color:#777;background:#000}
+.msg-flash{background:#333!important}
+#input-area{position:fixed;bottom:0;left:0;width:100%;min-height:80px;padding:15px;background:#000;border-top:1px solid #222;z-index:9999;display:none;align-items:flex-end;transition:opacity .3s}
+#input-wrapper{display:flex;width:100%;align-items:flex-end}
+#nick-input{width:70px;min-width:70px;background:#111;border:1px solid #333;color:#888;padding:13px 5px;font-size:16px;outline:none;text-align:center;border-radius:4px 0 0 4px;border-right:none;height:50px}
+#send-btn{width:50px;min-width:50px;height:50px;background:#fff;color:#000;border:1px solid #333;border-radius:0 4px 4px 0;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:bold}
+#send-btn:disabled{opacity:.3;cursor:not-allowed}
+#message-input{flex:1;background:#111;border:1px solid #333;color:#fff;padding:13px 15px;font-size:16px;outline:none;resize:none;height:50px;max-height:150px;line-height:22px;overflow-y:auto}
+#message-input:disabled{opacity:.5;cursor:not-allowed}
+#nick-input:focus,#message-input:focus{border:2px solid #fff!important;box-shadow:0 0 10px rgba(255,255,255,.5);z-index:2}
+.reply-container{display:flex;margin-bottom:6px;gap:8px;cursor:pointer}
+.reply-line{width:2px;background:#444;border-radius:2px;flex-shrink:0}
+.reply-preview-text{font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;display:flex;align-items:center}
+.msg-body{cursor:pointer}
+#reply-bar{display:none;background:#111;border-top:1px solid #222;padding:8px 15px;font-size:13px;color:#888;justify-content:space-between;align-items:center;position:fixed;width:100%;z-index:10001}
+#cancel-reply-btn{cursor:pointer;color:#fff;font-weight:bold;padding:0 5px}
+.reply-nick-badge{background:#fff;color:#000;font-weight:700;font-size:10px;padding:2px 6px;border-radius:3px;margin-right:8px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+#typing-indicator{display:none;position:fixed;left:0;width:100%;z-index:9998;height:26px;padding:0 15px;background:#000;border-top:1px solid #1a1a1a;align-items:center;pointer-events:none}
+#typing-indicator span{font-size:12px;color:#555;opacity:0;transition:opacity .2s}
+#typing-indicator span.visible{opacity:1;animation:blink 1.2s infinite}
+@media(min-width:769px){#send-btn{display:none!important}#message-input{border-radius:0 4px 4px 0!important;border-right:1px solid #333!important}}
 </style>
 </head>
 <body>
-<div id="setup-panel"><span id="room-title">Güvenli Kanal</span><span id="status-badge" class="connecting">Bağlanılıyor...</span></div>
+<div id="setup-panel">
+<div id="my-id-display">Kodunuz yükleniyor...</div>
+<input type="text" id="peer-id-input" placeholder="Kodu buraya yapıştır">
+<button id="connect-btn">Bağlan</button>
+</div>
 <div id="chat-area"></div>
 <div id="typing-indicator"><span id="typing-text">Yeni mesaj yolda • • •</span></div>
 <div id="reply-bar"><span id="reply-bar-text">Yanıtlanıyor...</span><span id="cancel-reply-btn">✕</span></div>
-<div id="input-area"><div id="input-wrapper"><input type="text" id="nick-input" placeholder="İsim" tabindex="1"><textarea id="message-input" placeholder="Bağlantı bekleniyor..." disabled tabindex="2"></textarea><button id="send-btn" disabled>➔</button></div></div>
+<div id="input-area">
+<div id="input-wrapper">
+<input type="text" id="nick-input" placeholder="İsim" tabindex="1">
+<textarea id="message-input" placeholder="Mesaj yaz" disabled tabindex="2"></textarea>
+<button id="send-btn" disabled>➔</button>
+</div>
+</div>
 <script>
-const PEER_ID_1='chat-p-r-x-1',PEER_ID_2='chat-p-r-x-2',statusBadge=document.getElementById('status-badge'),chatArea=document.getElementById('chat-area'),nickInput=document.getElementById('nick-input'),sendBtn=document.getElementById('send-btn'),messageInput=document.getElementById('message-input'),typingIndicator=document.getElementById('typing-indicator'),typingText=document.getElementById('typing-text'),replyBar=document.getElementById('reply-bar'),replyBarText=document.getElementById('reply-bar-text'),cancelReplyBtn=document.getElementById('cancel-reply-btn');let replyingTo=null,lastCancelTime=0,lastSenderNick=null,typingTimeout=null,myTypingTimeout=null,isTypingSent=!1,peer=null,conn=null,pingInterval=null,reconnectInterval=null,missedPings=0,currentMyId=null,targetPeerId=null;const TYPING_BAR_HEIGHT=26;nickInput.addEventListener('focus',()=>{nickInput.value=''});function initPeerSystem(e){peer&&(try{peer.destroy()}catch(e){}),currentMyId=e,targetPeerId=e===PEER_ID_1?PEER_ID_2:PEER_ID_1,peer=new Peer(currentMyId),peer.on('open',e=>{updateStatus('connecting','Eş aranıyor...'),currentMyId===PEER_ID_2&&tryConnectToTarget()}),peer.on('connection',e=>{conn&&closeExistingConnection(),conn=e,setupConnectionHandlers()}),peer.on('error',e=>{'unavailable-id'===e.type&&currentMyId===PEER_ID_1?initPeerSystem(PEER_ID_2):handleDisconnectState()})}function tryConnectToTarget(){conn&&conn.open||(updateStatus('connecting','Bağlanılıyor...'),conn=peer.connect(targetPeerId,{reliable:!0}),setupConnectionHandlers())}function closeExistingConnection(){pingInterval&&clearInterval(pingInterval),conn&&(try{conn.close()}catch(e){},conn=null)}function updateStatus(e,n){statusBadge.className='status-badge '+e,statusBadge.innerText=n,'connected'===e?(messageInput.disabled=!1,sendBtn.disabled=!1,messageInput.placeholder='Yazın...'):(messageInput.disabled=!0,sendBtn.disabled=!0,messageInput.placeholder=n)}function showTypingIndicator(){typingText.classList.add('visible'),typingTimeout&&clearTimeout(typingTimeout),typingTimeout=setTimeout(hideTypingIndicator,4e3)}function hideTypingIndicator(){typingTimeout&&(clearTimeout(typingTimeout),typingTimeout=null),typingText.classList.remove('visible')}function setupConnectionHandlers(){conn.on('open',()=>{reconnectInterval&&(clearInterval(reconnectInterval),reconnectInterval=null),updateStatus('connected','Bağlı'),missedPings=0,pingInterval&&clearInterval(pingInterval),pingInterval=setInterval(()=>{conn&&conn.open?(conn.send({type:'ping'}),missedPings++,missedPings>3&&handleDisconnectState()):handleDisconnectState()},2e3),adjustInputHeight()}),conn.on('data',e=>{if('ping'===e.type)return missedPings=0,void(conn&&conn.open&&conn.send({type:'pong'}));if('pong'===e.type)return void(missedPings=0);if('typing'===e.type)return void showTypingIndicator();if('typing-stop'===e.type)return void hideTypingIndicator();hideTypingIndicator(),appendMessage(e.text,e.senderNick,!1,e.reply,e.msgId)}),conn.on('close',handleDisconnectState),conn.on('error',handleDisconnectState)}function handleDisconnectState(){closeExistingConnection(),hideTypingIndicator(),updateStatus('disconnected','Koptu, bağlanıyor...'),reconnectInterval||(reconnectInterval=setInterval(()=>{currentMyId===PEER_ID_2?tryConnectToTarget():peer&&peer.destroyed&&initPeerSystem(PEER_ID_1)},3e3))}function appendMessage(e,n,t,r=null,a=null){const o=document.createElement('div');o.className='msg';const i=a||'msg-'+Date.now()+'-'+Math.floor(1e3*Math.random());if(o.id=i,t&&o.classList.add('own-msg'),HN=(n&&''!==n.trim())?n.trim():'');let s=null;if(HN.length>=2&&'.'===HN.charAt(1)){const e=HN.charAt(0).toLowerCase(),t={'r':'#ff4444','g':'#00e676','b':'#29b6f6','y':'#ffee55','p':'#f475ff','o':'#ffa726','v':'#ab47bc','c':'#00e5ff','w':'#ffffff'}[e];t&&(s=t,HN=HN.substring(2))}if(r){const e=document.createElement('div');e.className='reply-container';const t=document.createElement('div');t.className='reply-line';const a=document.createElement('div');if(a.className='reply-preview-text',r.nick&&''!==r.nick.trim()){let e=r.nick.trim();HN.length>=2&&'.'===HN.charAt(1)&&(e=e.substring(2));const t=document.createElement('span');t.className='reply-nick-badge',t.innerText=e;const n=document.createElement('span');n.innerText=r.text,a.appendChild(t),a.appendChild(n)}else a.innerText=r.text;e.appendChild(t),e.appendChild(a),r.targetId&&e.addEventListener('click',e=>{e.stopPropagation();const t=document.getElementById(r.targetId);t&&(t.scrollIntoView({behavior:'smooth',block:'center'}),t.classList.add('msg-flash'),setTimeout(()=>t.classList.remove('msg-flash'),800))}),o.appendChild(e),lastSenderNick=null}if(''!==HN&&HN!==lastSenderNick){const e=document.createElement('div');e.style.fontWeight='700',e.style.fontSize='13px',e.style.marginBottom='2px',s?e.style.color=s:e.style.color='piar'===HN.toLowerCase()?'#00e5ff':'sistem'===HN.toLowerCase()?'#ff0000':'bless'===HN.toLowerCase()?'#f475ff':'#ccc',e.innerText=HN,o.appendChild(e),lastSenderNick=HN}else''===HN&&(lastSenderNick=null);const l=document.createElement('div');return l.className='msg-body',l.innerHTML=e.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>'),l.addEventListener('click',()=>{if(!(Date.now()-lastCancelTime<300)){const e=n&&''!==n.trim()?n:'';replyingTo={text:e,nick:e,targetId:i},replyBarText.innerText=HN?HN+' kullanıcısına yanıt veriliyor...':'Mesaja yanıt veriliyor...',replyBar.style.display='flex',adjustInputHeight(),messageInput.focus()}}),o.appendChild(l),chatArea.appendChild(o),chatArea.getElementsByClassName('msg').length>200&&chatArea.removeChild(chatArea.getElementsByClassName('msg')[0]),setTimeout(()=>{chatArea.scrollTop=chatArea.scrollHeight},30),i}function adjustInputHeight(){messageInput.style.height='50px',messageInput.scrollHeight>50&&(messageInput.style.height=Math.min(150,messageInput.scrollHeight)+'px');const e=inputArea.offsetHeight,t=window.visualViewport?window.visualViewport.height:window.innerHeight,n=window.innerHeight-t;typingIndicator.style.bottom=n+e+'px',replyingTo&&(replyBar.style.bottom=n+e+'px'),chatArea.style.bottom=n+e+26+'px',chatArea.scrollTop=chatArea.scrollHeight}function closeReplyBar(){replyingTo=null,replyBar.style.display='none',adjustInputHeight()}messageInput.addEventListener('input',()=>{adjustInputHeight(),conn&&conn.open&&(!isTypingSent&&(conn.send({type:'typing'}),isTypingSent=!0),myTypingTimeout&&clearTimeout(myTypingTimeout),myTypingTimeout=setTimeout(()=>{conn&&conn.open&&conn.send({type:'typing-stop'}),isTypingSent=!1},2e3))}),cancelReplyBtn.addEventListener('pointerdown',e=>{e.preventDefault(),e.stopPropagation(),e.stopImmediatePropagation(),lastCancelTime=Date.now(),closeReplyBar(),setTimeout(()=>{messageInput.focus()},10)});function sendMessage(){const e=messageInput.value.trim(),t=nickInput.value.trim();if(''!==e&&conn&&conn.open){myTypingTimeout&&clearTimeout(myTypingTimeout),isTypingSent&&conn.send({type:'typing-stop'}),isTypingSent=!1;const n='msg-'+Date.now()+'-'+Math.floor(1e3*Math.random()),r={text:e,senderNick:t,reply:replyingTo,msgId:n};conn.send(r),appendMessage(e,t,!0,replyingTo,n),closeReplyBar(),messageInput.value='',adjustInputHeight()}}sendBtn.addEventListener('pointerdown',e=>{e.preventDefault(),sendMessage(),setTimeout(()=>{messageInput.focus()},10)}),messageInput.addEventListener('keydown',e=>{if('Enter'===e.key&&!e.shiftKey){if(('ontouchstart'in window)&&window.innerWidth<=768)return;e.preventDefault(),sendMessage()}}),document.addEventListener('keydown',e=>{if('Tab'===e.key&&!messageInput.disabled){const t=document.activeElement;e.shiftKey?t===nickInput&&(e.preventDefault(),messageInput.focus()):t===messageInput&&(e.preventDefault(),nickInput.focus())}}),window.visualViewport&&window.visualViewport.addEventListener('resize',adjustInputHeight),initPeerSystem(PEER_ID_1);
+const myIdDisplay=document.getElementById('my-id-display'),peerIdInput=document.getElementById('peer-id-input'),connectBtn=document.getElementById('connect-btn'),chatArea=document.getElementById('chat-area'),nickInput=document.getElementById('nick-input'),sendBtn=document.getElementById('send-btn'),messageInput=document.getElementById('message-input'),setupPanel=document.getElementById('setup-panel'),inputArea=document.getElementById('input-area'),typingIndicator=document.getElementById('typing-indicator'),typingText=document.getElementById('typing-text'),replyBar=document.getElementById('reply-bar'),replyBarText=document.getElementById('reply-bar-text'),cancelReplyBtn=document.getElementById('cancel-reply-btn');
+let replyingTo=null,lastCancelTime=0,lastSenderNick=null,typingTimeout=null,myTypingTimeout=null,isTypingSent=false,conn=null,pingInterval=null,missedPings=0,targetPeerId=null,isReconnecting=false,reconnectTimer=null,reconnectInterval=null;
+nickInput.addEventListener('focus',()=>nickInput.value='');
+myIdDisplay.addEventListener('click',()=>{
+const t=myIdDisplay.innerText;if(t==="Kodunuz yükleniyor..."||t==="Kopyalandı!")return;
+navigator.clipboard.writeText(t).then(()=>{
+myIdDisplay.innerText="Kopyalandı!";myIdDisplay.style.color="#fff";
+setTimeout(()=>{myIdDisplay.innerText=t;myIdDisplay.style.color="#888"},2000);
+});
+});
+const peer=new Peer();peer.on('open',id=>myIdDisplay.innerText=id);
+connectBtn.addEventListener('click',()=>{const f=peerIdInput.value.trim();if(f){targetPeerId=f;conn=peer.connect(f);setupConnectionHandlers()}});
+peer.on('connection',c=>{targetPeerId=c.peer;conn=c;setupConnectionHandlers()});
+function showTypingIndicator(){typingText.classList.add('visible');if(typingTimeout)clearTimeout(typingTimeout);typingTimeout=setTimeout(hideTypingIndicator,4000)}
+function hideTypingIndicator(){if(typingTimeout){clearTimeout(typingTimeout);typingTimeout=null}typingText.classList.remove('visible')}
+function setupConnectionHandlers(){
+conn.on('open',()=>{
+if(isReconnecting){clearTimeout(reconnectTimer);clearInterval(reconnectInterval);isReconnecting=false}
+chatArea.style.display=inputArea.style.display=typingIndicator.style.display='flex';setupPanel.style.display='none';chatArea.style.top='0px';
+inputArea.style.opacity='1';messageInput.disabled=sendBtn.disabled=false;messageInput.placeholder="Yazın...";messageInput.value="";messageInput.focus();
+missedPings=0;if(pingInterval)clearInterval(pingInterval);
+pingInterval=setInterval(()=>{if(conn&&conn.open){conn.send({type:'ping'});missedPings++;if(missedPings>3)handleDisconnect()}},2000);
+adjustInputHeight();setTimeout(()=>{chatArea.scrollTop=chatArea.scrollHeight},100);
+});
+conn.on('data',d=>{
+if(d.type==='ping'){missedPings=0;if(conn&&conn.open)conn.send({type:'pong'});return}
+if(d.type==='pong'){missedPings=0;return}
+if(d.type==='typing'){showTypingIndicator();return}
+if(d.type==='typing-stop'){hideTypingIndicator();return}
+hideTypingIndicator();appendMessage(d.text,d.senderNick,false,d.reply,d.msgId);
+});
+conn.on('close',handleDisconnect);conn.on('error',handleDisconnect);
+}
+function handleDisconnect(){
+if(pingInterval){clearInterval(pingInterval);pingInterval=null}hideTypingIndicator();if(isReconnecting)return;isReconnecting=true;
+inputArea.style.opacity='0.6';messageInput.disabled=sendBtn.disabled=true;messageInput.value="";messageInput.placeholder="Bağlantı koptu, yeniden bağlanılıyor, bekleyin.";closeReplyBar();
+reconnectTimer=setTimeout(()=>{clearInterval(reconnectInterval);resetToMainMenu()},45000);
+reconnectInterval=setInterval(()=>{if(targetPeerId&&peer&&!peer.destroyed){conn=peer.connect(targetPeerId);setupConnectionHandlers()}},3000);
+}
+function resetToMainMenu(){
+if(pingInterval)clearInterval(pingInterval);if(reconnectInterval)clearInterval(reconnectInterval);if(reconnectTimer)clearTimeout(reconnectTimer);
+isReconnecting=false;hideTypingIndicator();typingIndicator.style.display='none';setupPanel.style.display='flex';chatArea.style.display=inputArea.style.display=replyBar.style.display='none';
+inputArea.style.opacity='1';replyingTo=lastSenderNick=null;messageInput.disabled=sendBtn.disabled=true;messageInput.value=peerIdInput.value=chatArea.innerHTML='';
+alert("45 saniye boyunca bağlantı kurulamadı. Giriş ekranına yönlendiriliyorsunuz.");
+}
+function appendMessage(text,senderNick,isOwnMessage,replyData=null,customId=null){
+const m=document.createElement('div');m.className='msg';const id=customId||'msg-'+Date.now()+'-'+Math.floor(Math.random()1000);m.id=id;
+if(isOwnMessage)m.classList.add('own-msg');
+let f=(senderNick&&senderNick.trim()!=='')?senderNick.trim():'',col=null;
+if(f.length>=2&&f.charAt(1)==='.'){
+const p=f.charAt(0).toLowerCase(),cMap={'r':'#ff4444','g':'#00e676','b':'#29b6f6','y':'#ffee55','p':'#f475ff','o':'#ffa726','v':'#ab47bc','c':'#00e5ff','w':'#ffffff'};
+if(cMap[p]){col=cMap[p];f=f.substring(2)}
+}
+if(replyData){
+const rc=document.createElement('div');rc.className='reply-container';
+const rl=document.createElement('div');rl.className='reply-line';
+const rp=document.createElement('div');rp.className='reply-preview-text';
+if(replyData.nick&&replyData.nick.trim()!==''){
+let cr=replyData.nick.trim();if(cr.length>=2&&cr.charAt(1)==='.')cr=cr.substring(2);
+const b=document.createElement('span');b.className='reply-nick-badge';b.innerText=cr;
+const t=document.createElement('span');t.innerText=replyData.text;rp.appendChild(b);rp.appendChild(t);
+}else{rp.innerText=replyData.text}
+rc.appendChild(rl);rc.appendChild(rp);
+if(replyData.targetId){
+rc.addEventListener('click',e=>{
+e.stopPropagation();const tMsg=document.getElementById(replyData.targetId);
+if(tMsg){tMsg.scrollIntoView({behavior:'smooth',block:'center'});tMsg.classList.add('msg-flash');setTimeout(()=>tMsg.classList.remove('msg-flash'),800)}
+});
+}
+m.appendChild(rc);lastSenderNick=null;
+}
+if(f!==''&&f!==lastSenderNick){
+const nd=document.createElement('div');nd.style.fontWeight='700';nd.style.fontSize='13px';nd.style.marginBottom='2px';
+nd.style.color=col?col:(f.toLowerCase()==='piar'?'#00e5ff':f.toLowerCase()==='sistem'?'#ff0000':f.toLowerCase()==='bless'?'#f475ff':'#ccc');
+nd.innerText=f;m.appendChild(nd);lastSenderNick=f;
+}else if(f===''){lastSenderNick=null}
+const td=document.createElement('div');td.className='msg-body';td.innerHTML=text.replace(/**(.?)**/g,'<b>latex
+1&lt;/b&gt;'); td.addEventListener('click',()=&gt;{ if(isReconnecting||Date.now()-lastCancelTime&lt;300)return; replyingTo={text:text,nick:senderNick?senderNick:'',targetId:id}; replyBarText.innerText=f?`
+
+{f} kullanıcısına yanıt veriliyor...:Mesaja yanıt veriliyor...`;
+replyBar.style.display='flex';adjustInputHeight();messageInput.focus();
+});
+m.appendChild(td);chatArea.appendChild(m);
+while(chatArea.getElementsByClassName('msg').length>200){chatArea.removeChild(chatArea.getElementsByClassName('msg')[0])}
+setTimeout(()=>{chatArea.scrollTop=chatArea.scrollHeight},30);return id;
+}
+function adjustInputHeight(){
+messageInput.style.height='50px';if(messageInput.scrollHeight>50)messageInput.style.height=Math.min(150,messageInput.scrollHeight)+'px';
+const h=inputArea.offsetHeight,v=window.visualViewport?window.visualViewport.height:window.innerHeight,k=window.innerHeight-v;
+typingIndicator.style.bottom=(k+h)+'px';if(replyingTo)replyBar.style.bottom=(k+h)+'px';
+chatArea.style.bottom=(k+h+26)+'px';chatArea.scrollTop=chatArea.scrollHeight;
+}
+messageInput.addEventListener('input',()=>{
+adjustInputHeight();if(conn&&conn.open){
+if(!isTypingSent){conn.send({type:'typing'});isTypingSent=true}
+if(myTypingTimeout)clearTimeout(myTypingTimeout);
+myTypingTimeout=setTimeout(()=>{if(conn&&conn.open)conn.send({type:'typing-stop'});isTypingSent=false},2000);
+}
+});
+function closeReplyBar(){replyingTo=null;replyBar.style.display='none';adjustInputHeight()}
+cancelReplyBtn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();lastCancelTime=Date.now();closeReplyBar();setTimeout(()=>{if(!isReconnecting)messageInput.focus()},10)});
+function sendMessage(){
+if(isReconnecting)return;const t=messageInput.value.trim(),n=nickInput.value.trim();
+if(t!==''){
+if(myTypingTimeout)clearTimeout(myTypingTimeout);if(conn&&conn.open&&isTypingSent)conn.send({type:'typing-stop'});isTypingSent=false;
+const id='msg-'+Date.now()+'-'+Math.floor(Math.random()*1000);
+if(conn&&conn.open)conn.send({text:t,senderNick:n,reply:replyingTo,msgId:id});
+appendMessage(t,n,true,replyingTo,id);closeReplyBar();messageInput.value='';adjustInputHeight();
+}
+}
+sendBtn.addEventListener('pointerdown',e=>{e.preventDefault();sendMessage();setTimeout(()=>{if(!isReconnecting)messageInput.focus()},10)});
+messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!(('ontouchstart' in window)&&(window.innerWidth<=768))){e.preventDefault();sendMessage()}});
+document.addEventListener('keydown',e=>{
+if(e.key==='Tab'&&!messageInput.disabled){
+const a=document.activeElement;e.preventDefault();
+if(e.shiftKey){if(a===nickInput)messageInput.focus()}else{if(a===messageInput)nickInput.focus()}
+}
+});
+if(window.visualViewport)window.visualViewport.addEventListener('resize',adjustInputHeight);
 </script>
 </body>
 </html>
