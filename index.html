@@ -239,18 +239,19 @@ flex-shrink: 0;
 }
 
 /* --- YENİ MESAJ YOLDA GÖSTERGESİ --- */
+/* Sabit yükseklik her zaman korunur; sadece metin görünüp kaybolur */
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.15; }
 }
 
 #typing-indicator {
-    display: none;
+    display: none; /* bağlantı kurulunca flex yapılır */
     position: fixed;
     left: 0;
     width: 100%;
     z-index: 9998;
-    height: 26px;
+    height: 26px;           /* sabit yükseklik — her zaman bu kadar yer kaplar */
     padding: 0 15px;
     background: #000;
     border-top: 1px solid #1a1a1a;
@@ -261,7 +262,7 @@ flex-shrink: 0;
 #typing-indicator span {
     font-size: 12px;
     color: #555;
-    opacity: 0;
+    opacity: 0;             /* başlangıçta görünmez */
     transition: opacity 0.2s;
 }
 
@@ -282,8 +283,10 @@ flex-shrink: 0;
 
 <div id="chat-area"></div>
 
+<!-- Sabit şerit: her zaman görünür, sadece içindeki metin gelip gider -->
 <div id="typing-indicator"><span id="typing-text">Yeni mesaj yolda • • •</span></div>
 
+<!-- Reply-bar: typing-indicator'ın tam üstünde konumlanır -->
 <div id="reply-bar">
 <span id="reply-bar-text">Yanıtlanıyor...</span>
 <span id="cancel-reply-btn">✕</span>
@@ -318,10 +321,14 @@ let replyingTo       = null;
 let lastCancelTime   = 0;
 let lastSenderNick   = null;
 
+// Karşı tarafın yazıyor göstergesi
 let typingTimeout    = null;
+
+// Kendi "yazıyor" sinyali için debounce
 let myTypingTimeout  = null;
 let isTypingSent     = false;
 
+// Typing-indicator'ın sabit yüksekliği (CSS ile eşleşmeli)
 const TYPING_BAR_HEIGHT = 26;
 
 nickInput.addEventListener('focus', () => { nickInput.value = ''; });
@@ -353,6 +360,7 @@ connectBtn.addEventListener('click', () => {
 
 peer.on('connection', (incomingConn) => { conn = incomingConn; setupConnectionHandlers(); });
 
+/* Yazıyor göstergesi: sadece metni göster/gizle, yükseklik değişmez */
 function showTypingIndicator() {
     typingText.classList.add('visible');
     if (typingTimeout) clearTimeout(typingTimeout);
@@ -368,7 +376,7 @@ function setupConnectionHandlers() {
     conn.on('open', () => {
         chatArea.style.display    = 'flex';
         inputArea.style.display   = 'flex';
-        typingIndicator.style.display = 'flex';
+        typingIndicator.style.display = 'flex'; /* şeridi aktif et */
         setupPanel.style.display  = 'none';
         chatArea.style.top        = '0px';
 
@@ -445,7 +453,7 @@ function appendMessage(text, senderNick, isOwnMessage, replyData = null, customI
             'p': '#f475ff',
             'o': '#ffa726',
             'v': '#ab47bc',
-            'c': '#00e5ff',
+            'c': '#00e5ff',  /* Piar turkuazıyla eşitlendi */
             'w': '#ffffff'
         };
         if (colorMap[colorPrefix]) {
@@ -554,29 +562,21 @@ function adjustInputHeight() {
     const viewportHeight  = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     const keyboardHeight  = window.innerHeight - viewportHeight;
 
+    /* Typing-indicator her zaman input'un hemen üstünde, sabit yükseklikte */
     typingIndicator.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
 
+    /* Reply-bar, typing-indicator'ın TAM üstüne biner (ayrı alan açmaz) */
     if (replyingTo) {
         replyBar.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
     }
 
+    /* Chat alanı: typing-bar'ın sabit yüksekliği kadar yukarıda biter */
     chatArea.style.bottom = (keyboardHeight + inputAreaHeight + TYPING_BAR_HEIGHT) + 'px';
     chatArea.scrollTop    = chatArea.scrollHeight;
 }
 
-messageInput.addEventListener('input', (e) => {
+messageInput.addEventListener('input', () => {
     adjustInputHeight();
-    
-    // Mobil sanal klavyelerin enter kontrolünü bypass edip input içinde satır atlamasını engellemek için ek koruma (Masaüstü/Tablet Bluetooth için)
-    const isPhoneScreen = window.innerWidth < 768;
-    if (!isPhoneScreen && messageInput.value.endsWith('\n') && !e.inputType?.includes('insertLineBreak')) {
-        // Eğer yanlışlıkla satır eklendiyse ve shift basılı değilse temizle (keydown kaçtıysa yedek mekanizma)
-        if (window.lastKeyEvent && !window.lastKeyEvent.shiftKey && window.lastKeyEvent.key === 'Enter') {
-            messageInput.value = messageInput.value.trim();
-            sendMessage();
-        }
-    }
-
     if (conn && conn.open) {
         if (!isTypingSent) { conn.send({ type: 'typing' }); isTypingSent = true; }
         if (myTypingTimeout) clearTimeout(myTypingTimeout);
@@ -628,27 +628,13 @@ sendBtn.addEventListener('pointerdown', (event) => {
     setTimeout(() => { messageInput.focus(); }, 10);
 });
 
-// Yeni Geliştirilmiş Kesin Çözümlü Klavye Dinleyicisi
 messageInput.addEventListener('keydown', (event) => {
-    window.lastKeyEvent = event; // input eventi için yedek hafıza
-    
     if (event.key === 'Enter') {
-        // Sadece dar telefon ekranlarını mobil sanal klavye kabul et.
-        // Tablet geniş ekranları (Masaüstü modu dahil) ve PC'leri masaüstü düzeni say.
-        const isPhoneScreen = window.innerWidth < 768;
-        
-        if (isPhoneScreen) {
-            // Sadece akıllı telefonlarda normal sanal klavye gibi alt satıra geçmesine izin ver
-            return;
-        } else {
-            // Samsung Tablet (Bluetooth klavye/DeX) ve Masaüstü PC için kesin tetikleme:
-            // Shift tuşuna basılmıyorsa mesajı anında GÖNDER
-            if (!event.shiftKey) {
-                event.preventDefault(); // Varsayılan yeni satır açmayı engelle
-                sendMessage(); // Mesajı gönder
-            }
-            // Shift + Enter kombinasyonunda dokunma, alt satıra geçsin
-        }
+        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isMobile) return;
+        if (event.shiftKey) return;
+        event.preventDefault();
+        sendMessage();
     }
 });
 
@@ -669,4 +655,4 @@ if (window.visualViewport) {
 }
 </script>
 </body>
-<
+</html>
