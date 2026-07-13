@@ -1,57 +1,304 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Widget2">
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>W2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Widget2</title>
+
 <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 <link rel="icon" href="https://i.ibb.co/XxHR1rxG/logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;700&display=swap" rel="stylesheet">
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Lexend',sans-serif}
-html,body{height:100%;background:#000;color:#fff;overflow:hidden;position:relative}
-#setup-panel{position:relative;z-index:10000;padding:15px;border-bottom:1px solid #222;display:flex;flex-direction:column;gap:10px;background:#000}
-#my-id-display{color:#888;font-size:14px;word-break:break-all;user-select:all;-webkit-user-select:all;cursor:pointer}
-#peer-id-input{background:#111;border:1px solid #333;color:#fff;padding:10px;font-size:16px;outline:none}
-#connect-btn{background:#fff;color:#000;border:none;padding:10px;font-size:16px;cursor:pointer;font-weight:bold}
-#chat-area{position:absolute;top:140px;left:0;right:0;bottom:80px;overflow-y:auto;padding:8px 0;display:none;flex-direction:column;gap:2px;font-size:18px;line-height:1.4}
-.msg{overflow-wrap:break-word;word-break:break-word;font-size:15px;padding:6px 8px;white-space:pre-wrap;color:#fff;background:#111;line-height:1.25;transition:background .4s}
-.msg.own-msg{color:#777;background:#000}
-.msg-flash{background:#333!important}
-#input-area{position:fixed;bottom:0;left:0;width:100%;min-height:80px;padding:15px;background:#000;border-top:1px solid #222;z-index:9999;display:none;align-items:flex-end;transition:opacity .3s}
-#input-wrapper{display:flex;width:100%;align-items:flex-end}
-#nick-input{width:70px;min-width:70px;background:#111;border:1px solid #333;color:#888;padding:13px 5px;font-size:16px;outline:none;text-align:center;border-radius:4px 0 0 4px;border-right:none;height:50px}
-#send-btn{width:50px;min-width:50px;height:50px;background:#fff;color:#000;border:1px solid #333;border-radius:0 4px 4px 0;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:bold}
-#send-btn:disabled{opacity:.3;cursor:not-allowed}
-#message-input{flex:1;background:#111;border:1px solid #333;color:#fff;padding:13px 15px;font-size:16px;outline:none;resize:none;height:50px;max-height:150px;line-height:22px;overflow-y:auto}
-#message-input:disabled{opacity:.5;cursor:not-allowed}
-#nick-input:focus,#message-input:focus{border:2px solid #fff!important;box-shadow:0 0 10px rgba(255,255,255,.5);z-index:2}
-.reply-container{display:flex;margin-bottom:6px;gap:8px;cursor:pointer}
-.reply-line{width:2px;background:#444;border-radius:2px;flex-shrink:0}
-.reply-preview-text{font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;display:flex;align-items:center}
-.msg-body{cursor:pointer}
-#reply-bar{display:none;background:#111;border-top:1px solid #222;padding:8px 15px;font-size:13px;color:#888;justify-content:space-between;align-items:center;position:fixed;width:100%;z-index:10001}
-#cancel-reply-btn{cursor:pointer;color:#fff;font-weight:bold;padding:0 5px}
-.reply-nick-badge{background:#fff;color:#000;font-weight:700;font-size:10px;padding:2px 6px;border-radius:3px;margin-right:8px}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
-#typing-indicator{display:none;position:fixed;left:0;width:100%;z-index:9998;height:26px;padding:0 15px;background:#000;border-top:1px solid #1a1a1a;align-items:center;pointer-events:none}
-#typing-indicator span{font-size:12px;color:#555;opacity:0;transition:opacity .2s}
-#typing-indicator span.visible{opacity:1;animation:blink 1.2s infinite}
-@media(min-width:769px){#send-btn{display:none!important}#message-input{border-radius:0 4px 4px 0!important;border-right:1px solid #333!important}}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Lexend', sans-serif; }
+
+html, body { height: 100%; background: #000; color: #fff; overflow: hidden; }
+body { position: relative; }
+
+#setup-panel {
+position: relative;
+z-index: 10000;
+padding: 15px;
+border-bottom: 1px solid #222;
+display: flex;
+flex-direction: column;
+gap: 10px;
+background: #000;
+}
+#my-id-display {
+color: #888;
+font-size: 14px;
+word-break: break-all;
+user-select: all;
+-webkit-user-select: all;
+cursor: pointer;
+}
+#peer-id-input { background: #111; border: 1px solid #333; color: #fff; padding: 10px; font-size: 16px; outline: none; }
+#connect-btn { background: #fff; color: #000; border: none; padding: 10px; font-size: 16px; cursor: pointer; font-weight: bold; }
+
+#chat-area {
+position: absolute;
+top: 140px;
+left: 0;
+right: 0;
+bottom: 80px;
+overflow-y: auto;
+padding: 8px 0;
+display: flex;
+flex-direction: column;
+gap: 2px;
+font-size: 18px;
+line-height: 1.4;
+display: none;
+}
+
+.msg {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    font-size: 15px;
+    padding: 6px 0;
+    white-space: pre-wrap;
+    color: #fff;
+    position: relative;
+    background-color: #000;
+    line-height: 1.25;
+    transition: background-color 0.4s ease;
+}
+
+.msg:not(.own-msg) {
+    background-color: #111;
+    padding: 6px 8px;
+}
+
+.msg.own-msg {
+color: #777;
+padding: 6px 8px;
+}
+
+.msg::before {
+    display: none;
+}
+
+.msg-flash {
+    background-color: #333 !important;
+}
+#input-area {
+position: fixed;
+bottom: 0;
+left: 0;
+width: 100%;
+min-height: 80px;
+padding: 15px;
+background: #000;
+border-top: 1px solid #222;
+z-index: 9999;
+display: flex;
+align-items: flex-end;
+display: none;
+transition: opacity 0.3s ease;
+}
+#input-wrapper { display: flex; width: 100%; align-items: flex-end; }
+
+#nick-input {
+width: 70px;
+min-width: 70px;
+background: #111;
+border: 1px solid #333;
+color: #888;
+padding: 13px 5px;
+font-size: 16px;
+outline: none;
+text-align: center;
+border-radius: 4px 0 0 4px;
+border-right: none;
+height: 50px;
+}
+
+#send-btn {
+width: 50px;
+min-width: 50px;
+height: 50px;
+background: #fff;
+color: #000;
+border: 1px solid #333;
+border-radius: 0 4px 4px 0;
+font-size: 18px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: bold;
+transition: background 0.2s;
+}
+
+#send-btn:disabled {
+opacity: 0.3;
+cursor: not-allowed;
+}
+
+#message-input {
+flex: 1;
+background: #111;
+border: 1px solid #333;
+color: #fff;
+padding: 13px 15px;
+font-size: 16px;
+outline: none;
+border-radius: 0;
+border-right: none;
+resize: none;
+height: 50px;
+max-height: 150px;
+font-family: 'Lexend', sans-serif;
+line-height: 22px;
+overflow-y: auto;
+}
+#message-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#nick-input:focus, #message-input:focus {
+border: 2px solid #fff !important;
+box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+z-index: 2;
+}
+
+/* --- YANIT ÖZELLİĞİ STİLLERİ --- */
+.reply-container {
+display: flex;
+flex-direction: row;
+align-items: stretch;
+margin-bottom: 6px;
+position: relative;
+padding-left: 2px;
+gap: 8px;
+cursor: pointer;
+}
+
+.reply-line {
+width: 2px;
+background-color: #444;
+border-radius: 2px;
+flex-shrink: 0;
+}
+
+.reply-preview-text {
+font-size: 12px;
+color: #666;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+flex: 1;
+display: flex;
+align-items: center;
+line-height: 1.4;
+}
+
+.msg-body {
+cursor: pointer;
+}
+
+/* Reply-bar: typing-bar'ın tam üstüne biner, ayrı alan açmaz */
+#reply-bar {
+display: none;
+background: #111;
+border-top: 1px solid #222;
+padding: 8px 15px;
+font-size: 13px;
+color: #888;
+justify-content: space-between;
+align-items: center;
+position: fixed;
+width: 100%;
+z-index: 10001;
+}
+#cancel-reply-btn {
+cursor: pointer;
+color: #fff;
+font-weight: bold;
+padding: 0 5px;
+}
+
+.reply-nick-badge {
+background-color: #fff;
+color: #000;
+font-weight: 700;
+font-size: 10px;
+padding: 2px 6px;
+border-radius: 3px;
+margin-right: 8px;
+display: inline-block;
+line-height: 1;
+flex-shrink: 0;
+}
+
+/* --- YENİ MESAJ YOLDA GÖSTERGESİ --- */
+@keyframes blink {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.15; }
+}
+
+#typing-indicator {
+display: none;
+position: fixed;
+left: 0;
+width: 100%;
+z-index: 9998;
+height: 26px;
+padding: 0 15px;
+background: #000;
+border-top: 1px solid #1a1a1a;
+align-items: center;
+pointer-events: none;
+}
+
+#typing-indicator span {
+font-size: 12px;
+color: #555;
+opacity: 0;
+transition: opacity 0.2s;
+}
+
+#typing-indicator span.visible {
+opacity: 1;
+animation: blink 1.2s ease-in-out infinite;
+}
+
+/* --- FİZİKSEL KLAVYE / MASAÜSTÜ İÇİN GÖNDER BUTONUNU GİZLEME STİLİ --- */
+@media (min-width: 769px) {
+#send-btn {
+display: none !important;
+}
+#message-input {
+border-radius: 0 4px 4px 0 !important;
+border-right: 1px solid #333 !important;
+}
+}
+
 </style>
 </head>
 <body>
+
 <div id="setup-panel">
 <div id="my-id-display">Kodunuz yükleniyor...</div>
 <input type="text" id="peer-id-input" placeholder="Kodu buraya yapıştır">
 <button id="connect-btn">Bağlan</button>
 </div>
+
 <div id="chat-area"></div>
+
 <div id="typing-indicator"><span id="typing-text">Yeni mesaj yolda • • •</span></div>
-<div id="reply-bar"><span id="reply-bar-text">Yanıtlanıyor...</span><span id="cancel-reply-btn">✕</span></div>
+
+<div id="reply-bar">
+<span id="reply-bar-text">Yanıtlanıyor...</span>
+<span id="cancel-reply-btn">✕</span>
+</div>
 <div id="input-area">
 <div id="input-wrapper">
 <input type="text" id="nick-input" placeholder="İsim" tabindex="1">
@@ -59,126 +306,417 @@ html,body{height:100%;background:#000;color:#fff;overflow:hidden;position:relati
 <button id="send-btn" disabled>➔</button>
 </div>
 </div>
+
 <script>
-const myIdDisplay=document.getElementById('my-id-display'),peerIdInput=document.getElementById('peer-id-input'),connectBtn=document.getElementById('connect-btn'),chatArea=document.getElementById('chat-area'),nickInput=document.getElementById('nick-input'),sendBtn=document.getElementById('send-btn'),messageInput=document.getElementById('message-input'),setupPanel=document.getElementById('setup-panel'),inputArea=document.getElementById('input-area'),typingIndicator=document.getElementById('typing-indicator'),typingText=document.getElementById('typing-text'),replyBar=document.getElementById('reply-bar'),replyBarText=document.getElementById('reply-bar-text'),cancelReplyBtn=document.getElementById('cancel-reply-btn');
-let replyingTo=null,lastCancelTime=0,lastSenderNick=null,typingTimeout=null,myTypingTimeout=null,isTypingSent=false,conn=null,pingInterval=null,missedPings=0,targetPeerId=null,isReconnecting=false,reconnectTimer=null,reconnectInterval=null;
-nickInput.addEventListener('focus',()=>nickInput.value='');
-myIdDisplay.addEventListener('click',()=>{
-const t=myIdDisplay.innerText;if(t==="Kodunuz yükleniyor..."||t==="Kopyalandı!")return;
-navigator.clipboard.writeText(t).then(()=>{
-myIdDisplay.innerText="Kopyalandı!";myIdDisplay.style.color="#fff";
-setTimeout(()=>{myIdDisplay.innerText=t;myIdDisplay.style.color="#888"},2000);
+const myIdDisplay = document.getElementById('my-id-display');
+const peerIdInput = document.getElementById('peer-id-input');
+const connectBtn = document.getElementById('connect-btn');
+const chatArea = document.getElementById('chat-area');
+const nickInput = document.getElementById('nick-input');
+const sendBtn = document.getElementById('send-btn');
+const messageInput = document.getElementById('message-input');
+const setupPanel = document.getElementById('setup-panel');
+const inputArea = document.getElementById('input-area');
+const typingIndicator = document.getElementById('typing-indicator');
+const typingText = document.getElementById('typing-text');
+
+const replyBar = document.getElementById('reply-bar');
+const replyBarText = document.getElementById('reply-bar-text');
+const cancelReplyBtn = document.getElementById('cancel-reply-btn');
+let replyingTo = null;
+
+let lastCancelTime = 0;
+let lastSenderNick = null;
+
+let typingTimeout = null;
+let myTypingTimeout = null;
+let isTypingSent = false;
+
+const TYPING_BAR_HEIGHT = 26;
+
+nickInput.addEventListener('focus', () => { nickInput.value = ''; });
+
+let conn = null;
+let pingInterval = null;
+let missedPings = 0;
+
+// Yeniden bağlanma mekanizması değişkenleri
+let targetPeerId = null;
+let isReconnecting = false;
+let reconnectTimer = null;
+let reconnectInterval = null;
+
+myIdDisplay.addEventListener('click', () => {
+const idText = myIdDisplay.innerText;
+if (idText === "Kodunuz yükleniyor..." || idText === "Kopyalandı!") return;
+navigator.clipboard.writeText(idText).then(() => {
+myIdDisplay.innerText = "Kopyalandı!";
+myIdDisplay.style.color = "#fff";
+setTimeout(() => {
+myIdDisplay.innerText = idText;
+myIdDisplay.style.color = "#888";
+}, 2000);
 });
 });
-const peer=new Peer();peer.on('open',id=>myIdDisplay.innerText=id);
-connectBtn.addEventListener('click',()=>{const f=peerIdInput.value.trim();if(f){targetPeerId=f;conn=peer.connect(f);setupConnectionHandlers()}});
-peer.on('connection',c=>{targetPeerId=c.peer;conn=c;setupConnectionHandlers()});
-function showTypingIndicator(){typingText.classList.add('visible');if(typingTimeout)clearTimeout(typingTimeout);typingTimeout=setTimeout(hideTypingIndicator,4000)}
-function hideTypingIndicator(){if(typingTimeout){clearTimeout(typingTimeout);typingTimeout=null}typingText.classList.remove('visible')}
-function setupConnectionHandlers(){
-conn.on('open',()=>{
-if(isReconnecting){clearTimeout(reconnectTimer);clearInterval(reconnectInterval);isReconnecting=false}
-chatArea.style.display=inputArea.style.display=typingIndicator.style.display='flex';setupPanel.style.display='none';chatArea.style.top='0px';
-inputArea.style.opacity='1';messageInput.disabled=sendBtn.disabled=false;messageInput.placeholder="Yazın...";messageInput.value="";messageInput.focus();
-missedPings=0;if(pingInterval)clearInterval(pingInterval);
-pingInterval=setInterval(()=>{if(conn&&conn.open){conn.send({type:'ping'});missedPings++;if(missedPings>3)handleDisconnect()}},2000);
-adjustInputHeight();setTimeout(()=>{chatArea.scrollTop=chatArea.scrollHeight},100);
-});
-conn.on('data',d=>{
-if(d.type==='ping'){missedPings=0;if(conn&&conn.open)conn.send({type:'pong'});return}
-if(d.type==='pong'){missedPings=0;return}
-if(d.type==='typing'){showTypingIndicator();return}
-if(d.type==='typing-stop'){hideTypingIndicator();return}
-hideTypingIndicator();appendMessage(d.text,d.senderNick,false,d.reply,d.msgId);
-});
-conn.on('close',handleDisconnect);conn.on('error',handleDisconnect);
+
+const peer = new Peer();
+peer.on('open', (id) => { myIdDisplay.innerText = id; });
+
+connectBtn.addEventListener('click', () => {
+const friendId = peerIdInput.value.trim();
+if (friendId) {
+targetPeerId = friendId;
+conn = peer.connect(friendId);
+setupConnectionHandlers();
 }
-function handleDisconnect(){
-if(pingInterval){clearInterval(pingInterval);pingInterval=null}hideTypingIndicator();if(isReconnecting)return;isReconnecting=true;
-inputArea.style.opacity='0.6';messageInput.disabled=sendBtn.disabled=true;messageInput.value="";messageInput.placeholder="Bağlantı koptu, yeniden bağlanılıyor, bekleyin.";closeReplyBar();
-reconnectTimer=setTimeout(()=>{clearInterval(reconnectInterval);resetToMainMenu()},45000);
-reconnectInterval=setInterval(()=>{if(targetPeerId&&peer&&!peer.destroyed){conn=peer.connect(targetPeerId);setupConnectionHandlers()}},3000);
+});
+
+peer.on('connection', (incomingConn) => {
+targetPeerId = incomingConn.peer;
+conn = incomingConn;
+setupConnectionHandlers();
+});
+
+function showTypingIndicator() {
+typingText.classList.add('visible');
+if (typingTimeout) clearTimeout(typingTimeout);
+typingTimeout = setTimeout(hideTypingIndicator, 4000);
 }
-function resetToMainMenu(){
-if(pingInterval)clearInterval(pingInterval);if(reconnectInterval)clearInterval(reconnectInterval);if(reconnectTimer)clearTimeout(reconnectTimer);
-isReconnecting=false;hideTypingIndicator();typingIndicator.style.display='none';setupPanel.style.display='flex';chatArea.style.display=inputArea.style.display=replyBar.style.display='none';
-inputArea.style.opacity='1';replyingTo=lastSenderNick=null;messageInput.disabled=sendBtn.disabled=true;messageInput.value=peerIdInput.value=chatArea.innerHTML='';
+
+function hideTypingIndicator() {
+if (typingTimeout) { clearTimeout(typingTimeout); typingTimeout = null; }
+typingText.classList.remove('visible');
+}
+
+function setupConnectionHandlers() {
+conn.on('open', () => {
+// Eğer kopuştan sonra kurtulduysak zamanlayıcıları temizle
+if (isReconnecting) {
+clearTimeout(reconnectTimer);
+clearInterval(reconnectInterval);
+isReconnecting = false;
+}
+
+chatArea.style.display = 'flex';
+inputArea.style.display = 'flex';
+typingIndicator.style.display = 'flex';
+setupPanel.style.display = 'none';
+chatArea.style.top = '0px';
+
+// Mesaj alanını ve tasarımı eski canlı haline getir
+inputArea.style.opacity = '1';
+messageInput.disabled = false;
+sendBtn.disabled = false;
+messageInput.placeholder = "Yazın...";
+messageInput.value = "";
+messageInput.focus();
+
+missedPings = 0;
+if (pingInterval) clearInterval(pingInterval);
+pingInterval = setInterval(() => {
+if (conn && conn.open) {
+conn.send({ type: 'ping' });
+missedPings++;
+if (missedPings > 3) handleDisconnect();
+}
+}, 2000);
+
+adjustInputHeight();
+setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 100);
+});
+
+conn.on('data', (data) => {
+if (data.type === 'ping') { missedPings = 0; if (conn && conn.open) conn.send({ type: 'pong' }); return; }
+if (data.type === 'pong') { missedPings = 0; return; }
+if (data.type === 'typing') { showTypingIndicator(); return; }
+if (data.type === 'typing-stop') { hideTypingIndicator(); return; }
+
+hideTypingIndicator();
+appendMessage(data.text, data.senderNick, false, data.reply, data.msgId);
+});
+
+conn.on('close', handleDisconnect);
+conn.on('error', handleDisconnect);
+}
+
+// Bağlantı koptuğunda çalışacak ara mekanizma
+function handleDisconnect() {
+if (pingInterval) { clearInterval(pingInterval); pingInterval = null; }
+hideTypingIndicator();
+
+if (isReconnecting) return; // Zaten süreç başladıysa tekrar tetikleme
+isReconnecting = true;
+
+// Mesaj yazma yerini koyulaştır ve kilitle
+inputArea.style.opacity = '0.6';
+messageInput.disabled = true;
+sendBtn.disabled = true;
+messageInput.value = "";
+messageInput.placeholder = "Bağlantı koptu, yeniden bağlanılıyor, bekleyin.";
+closeReplyBar();
+
+// 45 saniyelik imha sayacı
+reconnectTimer = setTimeout(() => {
+clearInterval(reconnectInterval);
+resetToMainMenu();
+}, 45000);
+
+// Her 3 saniyede bir gizlice yeniden bağlanmayı dene
+reconnectInterval = setInterval(() => {
+if (targetPeerId && peer && !peer.destroyed) {
+conn = peer.connect(targetPeerId);
+setupConnectionHandlers();
+}
+}, 3000);
+}
+
+// 45 saniye dolduğunda tamamen sıfırlayan ana fonksiyon
+function resetToMainMenu() {
+if (pingInterval) { clearInterval(pingInterval); pingInterval = null; }
+if (reconnectInterval) { clearInterval(reconnectInterval); reconnectInterval = null; }
+if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+
+isReconnecting = false;
+hideTypingIndicator();
+typingIndicator.style.display = 'none';
+
+setupPanel.style.display = 'flex';
+chatArea.style.display = 'none';
+inputArea.style.display = 'none';
+replyBar.style.display = 'none';
+inputArea.style.opacity = '1';
+replyingTo = null;
+lastSenderNick = null;
+messageInput.disabled = true;
+sendBtn.disabled = true;
+messageInput.value = '';
+peerIdInput.value = '';
+chatArea.innerHTML = '';
+
 alert("45 saniye boyunca bağlantı kurulamadı. Giriş ekranına yönlendiriliyorsunuz.");
 }
-function appendMessage(text,senderNick,isOwnMessage,replyData=null,customId=null){
-const m=document.createElement('div');m.className='msg';const id=customId||'msg-'+Date.now()+'-'+Math.floor(Math.random()1000);m.id=id;
-if(isOwnMessage)m.classList.add('own-msg');
-let f=(senderNick&&senderNick.trim()!=='')?senderNick.trim():'',col=null;
-if(f.length>=2&&f.charAt(1)==='.'){
-const p=f.charAt(0).toLowerCase(),cMap={'r':'#ff4444','g':'#00e676','b':'#29b6f6','y':'#ffee55','p':'#f475ff','o':'#ffa726','v':'#ab47bc','c':'#00e5ff','w':'#ffffff'};
-if(cMap[p]){col=cMap[p];f=f.substring(2)}
-}
-if(replyData){
-const rc=document.createElement('div');rc.className='reply-container';
-const rl=document.createElement('div');rl.className='reply-line';
-const rp=document.createElement('div');rp.className='reply-preview-text';
-if(replyData.nick&&replyData.nick.trim()!==''){
-let cr=replyData.nick.trim();if(cr.length>=2&&cr.charAt(1)==='.')cr=cr.substring(2);
-const b=document.createElement('span');b.className='reply-nick-badge';b.innerText=cr;
-const t=document.createElement('span');t.innerText=replyData.text;rp.appendChild(b);rp.appendChild(t);
-}else{rp.innerText=replyData.text}
-rc.appendChild(rl);rc.appendChild(rp);
-if(replyData.targetId){
-rc.addEventListener('click',e=>{
-e.stopPropagation();const tMsg=document.getElementById(replyData.targetId);
-if(tMsg){tMsg.scrollIntoView({behavior:'smooth',block:'center'});tMsg.classList.add('msg-flash');setTimeout(()=>tMsg.classList.remove('msg-flash'),800)}
-});
-}
-m.appendChild(rc);lastSenderNick=null;
-}
-if(f!==''&&f!==lastSenderNick){
-const nd=document.createElement('div');nd.style.fontWeight='700';nd.style.fontSize='13px';nd.style.marginBottom='2px';
-nd.style.color=col?col:(f.toLowerCase()==='piar'?'#00e5ff':f.toLowerCase()==='sistem'?'#ff0000':f.toLowerCase()==='bless'?'#f475ff':'#ccc');
-nd.innerText=f;m.appendChild(nd);lastSenderNick=f;
-}else if(f===''){lastSenderNick=null}
-const td=document.createElement('div');td.className='msg-body';td.innerHTML=text.replace(/**(.?)**/g,'<b>latex
-1&lt;/b&gt;'); td.addEventListener('click',()=&gt;{ if(isReconnecting||Date.now()-lastCancelTime&lt;300)return; replyingTo={text:text,nick:senderNick?senderNick:'',targetId:id}; replyBarText.innerText=f?`
 
-{f} kullanıcısına yanıt veriliyor...:Mesaja yanıt veriliyor...`;
-replyBar.style.display='flex';adjustInputHeight();messageInput.focus();
+function appendMessage(text, senderNick, isOwnMessage, replyData = null, customId = null) {
+const msgDiv = document.createElement('div');
+msgDiv.className = 'msg';
+const messageId = customId || 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+msgDiv.id = messageId;
+
+if (isOwnMessage) msgDiv.classList.add('own-msg');
+
+let finalNick = (senderNick && senderNick.trim() !== '') ? senderNick.trim() : '';
+let chosenColor = null;
+
+if (finalNick.length >= 2 && finalNick.charAt(1) === '.') {
+const colorPrefix = finalNick.charAt(0).toLowerCase();
+const colorMap = {
+'r': '#ff4444',
+'g': '#00e676',
+'b': '#29b6f6',
+'y': '#ffee55',
+'p': '#f475ff',
+'o': '#ffa726',
+'v': '#ab47bc',
+'c': '#00e5ff',
+'w': '#ffffff'
+};
+if (colorMap[colorPrefix]) {
+chosenColor = colorMap[colorPrefix];
+finalNick = finalNick.substring(2);
+}
+}
+
+if (replyData) {
+const replyContainer = document.createElement('div');
+replyContainer.className = 'reply-container';
+const replyLine = document.createElement('div');
+replyLine.className = 'reply-line';
+const replyPreview = document.createElement('div');
+replyPreview.className = 'reply-preview-text';
+
+if (replyData.nick && replyData.nick.trim() !== '') {
+let cleanReplyNick = replyData.nick.trim();
+if (cleanReplyNick.length >= 2 && cleanReplyNick.charAt(1) === '.') cleanReplyNick = cleanReplyNick.substring(2);
+const badgeSpan = document.createElement('span');
+badgeSpan.className = 'reply-nick-badge';
+badgeSpan.innerText = cleanReplyNick;
+const textSpan = document.createElement('span');
+textSpan.innerText = replyData.text;
+replyPreview.appendChild(badgeSpan);
+replyPreview.appendChild(textSpan);
+} else {
+replyPreview.innerText = replyData.text;
+}
+
+replyContainer.appendChild(replyLine);
+replyContainer.appendChild(replyPreview);
+
+if (replyData.targetId) {
+replyContainer.addEventListener('click', (e) => {
+e.stopPropagation();
+const targetMsg = document.getElementById(replyData.targetId);
+if (targetMsg) {
+targetMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+targetMsg.classList.add('msg-flash');
+setTimeout(() => targetMsg.classList.remove('msg-flash'), 800);
+}
 });
-m.appendChild(td);chatArea.appendChild(m);
-while(chatArea.getElementsByClassName('msg').length>200){chatArea.removeChild(chatArea.getElementsByClassName('msg')[0])}
-setTimeout(()=>{chatArea.scrollTop=chatArea.scrollHeight},30);return id;
 }
-function adjustInputHeight(){
-messageInput.style.height='50px';if(messageInput.scrollHeight>50)messageInput.style.height=Math.min(150,messageInput.scrollHeight)+'px';
-const h=inputArea.offsetHeight,v=window.visualViewport?window.visualViewport.height:window.innerHeight,k=window.innerHeight-v;
-typingIndicator.style.bottom=(k+h)+'px';if(replyingTo)replyBar.style.bottom=(k+h)+'px';
-chatArea.style.bottom=(k+h+26)+'px';chatArea.scrollTop=chatArea.scrollHeight;
+
+msgDiv.appendChild(replyContainer);
+lastSenderNick = null;
 }
-messageInput.addEventListener('input',()=>{
-adjustInputHeight();if(conn&&conn.open){
-if(!isTypingSent){conn.send({type:'typing'});isTypingSent=true}
-if(myTypingTimeout)clearTimeout(myTypingTimeout);
-myTypingTimeout=setTimeout(()=>{if(conn&&conn.open)conn.send({type:'typing-stop'});isTypingSent=false},2000);
+
+if (finalNick !== '' && finalNick !== lastSenderNick) {
+const nickDiv = document.createElement('div');
+nickDiv.style.fontWeight = '700';
+nickDiv.style.fontSize = '13px';
+nickDiv.style.marginBottom = '2px';
+
+if (chosenColor) {
+nickDiv.style.color = chosenColor;
+} else {
+if (finalNick.toLowerCase() === 'piar') nickDiv.style.color = '#00e5ff';
+else if (finalNick.toLowerCase() === 'sistem') nickDiv.style.color = '#ff0000';
+else if (finalNick.toLowerCase() === 'bless') nickDiv.style.color = '#f475ff';
+else nickDiv.style.color = '#ccc';
+}
+
+nickDiv.innerText = finalNick;
+msgDiv.appendChild(nickDiv);
+lastSenderNick = finalNick;
+} else if (finalNick === '') {
+lastSenderNick = null;
+}
+
+const textDiv = document.createElement('div');
+textDiv.className = 'msg-body';
+textDiv.innerHTML = text.replace(/**(.*?)**/g, '<b>$`1</b>');
+
+textDiv.addEventListener('click', () => {
+if (isReconnecting) return; // Bağlantı yokken yanıtlama yapılamasın
+if (Date.now() - lastCancelTime < 300) return;
+const activeNick = (senderNick && senderNick.trim() !== '') ? senderNick : '';
+replyingTo = { text: text, nick: activeNick, targetId: messageId };
+replyBarText.innerText = finalNick
+? ``${finalNick} kullanıcısına yanıt veriliyor...:Mesaja yanıt veriliyor...`;
+replyBar.style.display = 'flex';
+adjustInputHeight();
+messageInput.focus();
+});
+
+msgDiv.appendChild(textDiv);
+chatArea.appendChild(msgDiv);
+
+while (chatArea.getElementsByClassName('msg').length > 200) {
+chatArea.removeChild(chatArea.getElementsByClassName('msg')[0]);
+}
+
+setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 30);
+return messageId;
+}
+
+function adjustInputHeight() {
+messageInput.style.height = '50px';
+if (messageInput.scrollHeight > 50) {
+messageInput.style.height = Math.min(150, messageInput.scrollHeight) + 'px';
+}
+
+const inputAreaHeight = inputArea.offsetHeight;
+const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+const keyboardHeight = window.innerHeight - viewportHeight;
+
+typingIndicator.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
+
+if (replyingTo) {
+replyBar.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
+}
+
+chatArea.style.bottom = (keyboardHeight + inputAreaHeight + TYPING_BAR_HEIGHT) + 'px';
+chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+messageInput.addEventListener('input', () => {
+adjustInputHeight();
+if (conn && conn.open) {
+if (!isTypingSent) { conn.send({ type: 'typing' }); isTypingSent = true; }
+if (myTypingTimeout) clearTimeout(myTypingTimeout);
+myTypingTimeout = setTimeout(() => {
+if (conn && conn.open) conn.send({ type: 'typing-stop' });
+isTypingSent = false;
+}, 2000);
 }
 });
-function closeReplyBar(){replyingTo=null;replyBar.style.display='none';adjustInputHeight()}
-cancelReplyBtn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();lastCancelTime=Date.now();closeReplyBar();setTimeout(()=>{if(!isReconnecting)messageInput.focus()},10)});
-function sendMessage(){
-if(isReconnecting)return;const t=messageInput.value.trim(),n=nickInput.value.trim();
-if(t!==''){
-if(myTypingTimeout)clearTimeout(myTypingTimeout);if(conn&&conn.open&&isTypingSent)conn.send({type:'typing-stop'});isTypingSent=false;
-const id='msg-'+Date.now()+'-'+Math.floor(Math.random()*1000);
-if(conn&&conn.open)conn.send({text:t,senderNick:n,reply:replyingTo,msgId:id});
-appendMessage(t,n,true,replyingTo,id);closeReplyBar();messageInput.value='';adjustInputHeight();
+
+function closeReplyBar() {
+replyingTo = null;
+replyBar.style.display = 'none';
+adjustInputHeight();
+}
+
+cancelReplyBtn.addEventListener('pointerdown', (event) => {
+event.preventDefault();
+event.stopPropagation();
+event.stopImmediatePropagation();
+lastCancelTime = Date.now();
+closeReplyBar();
+setTimeout(() => { if(!isReconnecting) messageInput.focus(); }, 10);
+});
+
+function sendMessage() {
+if (isReconnecting) return;
+const textToSend = messageInput.value.trim();
+const currentNick = nickInput.value.trim();
+
+if (textToSend !== '') {
+if (myTypingTimeout) clearTimeout(myTypingTimeout);
+if (conn && conn.open && isTypingSent) conn.send({ type: 'typing-stop' });
+isTypingSent = false;
+
+const myMsgId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+const messageData = { text: textToSend, senderNick: currentNick, reply: replyingTo, msgId: myMsgId };
+
+if (conn && conn.open) conn.send(messageData);
+appendMessage(textToSend, currentNick, true, replyingTo, myMsgId);
+closeReplyBar();
+messageInput.value = '';
+adjustInputHeight();
 }
 }
-sendBtn.addEventListener('pointerdown',e=>{e.preventDefault();sendMessage();setTimeout(()=>{if(!isReconnecting)messageInput.focus()},10)});
-messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!(('ontouchstart' in window)&&(window.innerWidth<=768))){e.preventDefault();sendMessage()}});
-document.addEventListener('keydown',e=>{
-if(e.key==='Tab'&&!messageInput.disabled){
-const a=document.activeElement;e.preventDefault();
-if(e.shiftKey){if(a===nickInput)messageInput.focus()}else{if(a===messageInput)nickInput.focus()}
+
+sendBtn.addEventListener('pointerdown', (event) => {
+event.preventDefault();
+sendMessage();
+setTimeout(() => { if(!isReconnecting) messageInput.focus(); }, 10);
+});
+
+/* --- GÜNCELLENEN KEYDOWN EVENTİ: FİZİKSEL KLAVYE & SQUASHING ENTER --- */
+messageInput.addEventListener('keydown', (event) => {
+if (event.key === 'Enter') {
+if (event.shiftKey) return;
+const isMobileVirtualKeyboard = ('ontouchstart' in window) && (window.innerWidth <= 768);
+if (isMobileVirtualKeyboard) return;
+
+event.preventDefault();
+sendMessage();
 }
 });
-if(window.visualViewport)window.visualViewport.addEventListener('resize',adjustInputHeight);
+
+document.addEventListener('keydown', (event) => {
+if (event.key === 'Tab') {
+if (messageInput.disabled) return;
+const activeElement = document.activeElement;
+if (event.shiftKey) {
+if (activeElement === nickInput) { event.preventDefault(); messageInput.focus(); }
+} else {
+if (activeElement === messageInput) { event.preventDefault(); nickInput.focus(); }
+}
+}
+});
+
+if (window.visualViewport) {
+window.visualViewport.addEventListener('resize', adjustInputHeight);
+}
 </script>
 </body>
 </html>
