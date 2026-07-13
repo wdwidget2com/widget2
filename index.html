@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;700&display=swap" rel="stylesheet">
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Lexend', sans-serif; }
+• { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Lexend', sans-serif; }
 
 html, body { height: 100%; background: #000; color: #fff; overflow: hidden; }
 body { position: relative; }
@@ -61,21 +61,21 @@ display: none;
 }
 
 .msg {
-    overflow-wrap: break-word;
-    word-break: break-word;
-    font-size: 15px;
-    padding: 6px 0;
-    white-space: pre-wrap;
-    color: #fff;
-    position: relative;
-    background-color: #000;
-    line-height: 1.25;
-    transition: background-color 0.4s ease;
+overflow-wrap: break-word;
+word-break: break-word;
+font-size: 15px;
+padding: 6px 0;
+white-space: pre-wrap;
+color: #fff;
+position: relative;
+background-color: #000;
+line-height: 1.25;
+transition: background-color 0.4s ease;
 }
 
 .msg:not(.own-msg) {
-    background-color: #111;
-    padding: 6px 8px;
+background-color: #111;
+padding: 6px 8px;
 }
 
 .msg.own-msg {
@@ -84,11 +84,11 @@ padding: 6px 8px;
 }
 
 .msg::before {
-    display: none;
+display: none;
 }
 
 .msg-flash {
-    background-color: #333 !important;
+background-color: #333 !important;
 }
 
 #input-area {
@@ -240,45 +240,45 @@ flex-shrink: 0;
 
 /* --- YENİ MESAJ YOLDA GÖSTERGESİ --- */
 @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.15; }
+0%, 100% { opacity: 1; }
+50% { opacity: 0.15; }
 }
 
 #typing-indicator {
-    display: none;
-    position: fixed;
-    left: 0;
-    width: 100%;
-    z-index: 9998;
-    height: 26px;
-    padding: 0 15px;
-    background: #000;
-    border-top: 1px solid #1a1a1a;
-    align-items: center;
-    pointer-events: none;
+display: none;
+position: fixed;
+left: 0;
+width: 100%;
+z-index: 9998;
+height: 26px;
+padding: 0 15px;
+background: #000;
+border-top: 1px solid #1a1a1a;
+align-items: center;
+pointer-events: none;
 }
 
 #typing-indicator span {
-    font-size: 12px;
-    color: #555;
-    opacity: 0;
-    transition: opacity 0.2s;
+font-size: 12px;
+color: #555;
+opacity: 0;
+transition: opacity 0.2s;
 }
 
 #typing-indicator span.visible {
-    opacity: 1;
-    animation: blink 1.2s ease-in-out infinite;
+opacity: 1;
+animation: blink 1.2s ease-in-out infinite;
 }
 
 /* --- FİZİKSEL KLAVYE / MASAÜSTÜ İÇİN GÖNDER BUTONUNU GİZLEME STİLİ --- */
 @media (min-width: 769px) {
-    #send-btn {
-        display: none !important;
-    }
-    #message-input {
-        border-radius: 0 4px 4px 0 !important;
-        border-right: 1px solid #333 !important;
-    }
+#send-btn {
+display: none !important;
+}
+#message-input {
+border-radius: 0 4px 4px 0 !important;
+border-right: 1px solid #333 !important;
+}
 }
 
 </style>
@@ -309,359 +309,358 @@ flex-shrink: 0;
 </div>
 
 <script>
-const myIdDisplay    = document.getElementById('my-id-display');
-const peerIdInput    = document.getElementById('peer-id-input');
-const connectBtn     = document.getElementById('connect-btn');
-const chatArea       = document.getElementById('chat-area');
-const nickInput      = document.getElementById('nick-input');
-const sendBtn        = document.getElementById('send-btn');
-const messageInput   = document.getElementById('message-input');
-const setupPanel     = document.getElementById('setup-panel');
-const inputArea      = document.getElementById('input-area');
+const myIdDisplay = document.getElementById('my-id-display');
+const peerIdInput = document.getElementById('peer-id-input');
+const connectBtn = document.getElementById('connect-btn');
+const chatArea = document.getElementById('chat-area');
+const nickInput = document.getElementById('nick-input');
+const sendBtn = document.getElementById('send-btn');
+const messageInput = document.getElementById('message-input');
+const setupPanel = document.getElementById('setup-panel');
+const inputArea = document.getElementById('input-area');
 const typingIndicator = document.getElementById('typing-indicator');
-const typingText     = document.getElementById('typing-text');
+const typingText = document.getElementById('typing-text');
 
-const replyBar       = document.getElementById('reply-bar');
-const replyBarText   = document.getElementById('reply-bar-text');
+const replyBar = document.getElementById('reply-bar');
+const replyBarText = document.getElementById('reply-bar-text');
 const cancelReplyBtn = document.getElementById('cancel-reply-btn');
-let replyingTo       = null;
+let replyingTo = null;
 
-let lastCancelTime   = 0;
-let lastSenderNick   = null;
+let lastCancelTime = 0;
+let lastSenderNick = null;
 
-let typingTimeout    = null;
-let myTypingTimeout  = null;
-let isTypingSent     = false;
+let typingTimeout = null;
+let myTypingTimeout = null;
+let isTypingSent = false;
 
 const TYPING_BAR_HEIGHT = 26;
 
 nickInput.addEventListener('focus', () => { nickInput.value = ''; });
 
-let conn         = null;
+let conn = null;
 let pingInterval = null;
-let missedPings  = 0;
+let missedPings = 0;
 
 myIdDisplay.addEventListener('click', () => {
-    const idText = myIdDisplay.innerText;
-    if (idText === "Kodunuz yükleniyor..." || idText === "Kopyalandı!") return;
-    navigator.clipboard.writeText(idText).then(() => {
-        myIdDisplay.innerText = "Kopyalandı!";
-        myIdDisplay.style.color = "#fff";
-        setTimeout(() => {
-            myIdDisplay.innerText = idText;
-            myIdDisplay.style.color = "#888";
-        }, 2000);
-    });
+const idText = myIdDisplay.innerText;
+if (idText === "Kodunuz yükleniyor..." || idText === "Kopyalandı!") return;
+navigator.clipboard.writeText(idText).then(() => {
+myIdDisplay.innerText = "Kopyalandı!";
+myIdDisplay.style.color = "#fff";
+setTimeout(() => {
+myIdDisplay.innerText = idText;
+myIdDisplay.style.color = "#888";
+}, 2000);
+});
 });
 
 const peer = new Peer();
 peer.on('open', (id) => { myIdDisplay.innerText = id; });
 
 connectBtn.addEventListener('click', () => {
-    const friendId = peerIdInput.value.trim();
-    if (friendId) { conn = peer.connect(friendId); setupConnectionHandlers(); }
+const friendId = peerIdInput.value.trim();
+if (friendId) { conn = peer.connect(friendId); setupConnectionHandlers(); }
 });
 
 peer.on('connection', (incomingConn) => { conn = incomingConn; setupConnectionHandlers(); });
 
 function showTypingIndicator() {
-    typingText.classList.add('visible');
-    if (typingTimeout) clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(hideTypingIndicator, 4000);
+typingText.classList.add('visible');
+if (typingTimeout) clearTimeout(typingTimeout);
+typingTimeout = setTimeout(hideTypingIndicator, 4000);
 }
 
 function hideTypingIndicator() {
-    if (typingTimeout) { clearTimeout(typingTimeout); typingTimeout = null; }
-    typingText.classList.remove('visible');
+if (typingTimeout) { clearTimeout(typingTimeout); typingTimeout = null; }
+typingText.classList.remove('visible');
 }
 
 function setupConnectionHandlers() {
-    conn.on('open', () => {
-        chatArea.style.display    = 'flex';
-        inputArea.style.display   = 'flex';
-        typingIndicator.style.display = 'flex';
-        setupPanel.style.display  = 'none';
-        chatArea.style.top        = '0px';
+conn.on('open', () => {
+chatArea.style.display = 'flex';
+inputArea.style.display = 'flex';
+typingIndicator.style.display = 'flex';
+setupPanel.style.display = 'none';
+chatArea.style.top = '0px';
 
-        messageInput.disabled     = false;
-        sendBtn.disabled          = false;
-        messageInput.placeholder  = "Yazın...";
-        messageInput.focus();
+messageInput.disabled = false;
+sendBtn.disabled = false;
+messageInput.placeholder = "Yazın...";
+messageInput.focus();
 
-        missedPings = 0;
-        if (pingInterval) clearInterval(pingInterval);
-        pingInterval = setInterval(() => {
-            if (conn && conn.open) {
-                conn.send({ type: 'ping' });
-                missedPings++;
-                if (missedPings > 3) resetToMainMenu();
-            }
-        }, 2000);
+missedPings = 0;
+if (pingInterval) clearInterval(pingInterval);
+pingInterval = setInterval(() => {
+if (conn && conn.open) {
+conn.send({ type: 'ping' });
+missedPings++;
+if (missedPings > 3) resetToMainMenu();
+}
+}, 2000);
 
-        adjustInputHeight();
-        setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 100);
-    });
+adjustInputHeight();
+setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 100);
+});
 
-    conn.on('data', (data) => {
-        if (data.type === 'ping')         { missedPings = 0; if (conn && conn.open) conn.send({ type: 'pong' }); return; }
-        if (data.type === 'pong')         { missedPings = 0; return; }
-        if (data.type === 'typing')       { showTypingIndicator(); return; }
-        if (data.type === 'typing-stop')  { hideTypingIndicator(); return; }
+conn.on('data', (data) => {
+if (data.type === 'ping') { missedPings = 0; if (conn && conn.open) conn.send({ type: 'pong' }); return; }
+if (data.type === 'pong') { missedPings = 0; return; }
+if (data.type === 'typing') { showTypingIndicator(); return; }
+if (data.type === 'typing-stop') { hideTypingIndicator(); return; }
 
-        hideTypingIndicator();
-        appendMessage(data.text, data.senderNick, false, data.reply, data.msgId);
-    });
+hideTypingIndicator();
+appendMessage(data.text, data.senderNick, false, data.reply, data.msgId);
+});
 
-    conn.on('close', resetToMainMenu);
+conn.on('close', resetToMainMenu);
 }
 
 function resetToMainMenu() {
-    if (pingInterval) { clearInterval(pingInterval); pingInterval = null; }
-    hideTypingIndicator();
-    typingIndicator.style.display = 'none';
+if (pingInterval) { clearInterval(pingInterval); pingInterval = null; }
+hideTypingIndicator();
+typingIndicator.style.display = 'none';
 
-    setupPanel.style.display  = 'flex';
-    chatArea.style.display    = 'none';
-    inputArea.style.display   = 'none';
-    replyBar.style.display    = 'none';
-    replyingTo                = null;
-    lastSenderNick            = null;
-    messageInput.disabled     = true;
-    sendBtn.disabled          = true;
-    messageInput.value        = '';
-    peerIdInput.value         = '';
-    chatArea.innerHTML        = '';
+setupPanel.style.display = 'flex';
+chatArea.style.display = 'none';
+inputArea.style.display = 'none';
+replyBar.style.display = 'none';
+replyingTo = null;
+lastSenderNick = null;
+messageInput.disabled = true;
+sendBtn.disabled = true;
+messageInput.value = '';
+peerIdInput.value = '';
+chatArea.innerHTML = '';
 
-    alert("Bağlantı koptu. Giriş ekranına yönlendiriliyorsunuz.");
+alert("Bağlantı koptu. Giriş ekranına yönlendiriliyorsunuz.");
 }
 
 function appendMessage(text, senderNick, isOwnMessage, replyData = null, customId = null) {
-    const msgDiv    = document.createElement('div');
-    msgDiv.className = 'msg';
-    const messageId = customId || 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-    msgDiv.id       = messageId;
+const msgDiv = document.createElement('div');
+msgDiv.className = 'msg';
+const messageId = customId || 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+msgDiv.id = messageId;
 
-    if (isOwnMessage) msgDiv.classList.add('own-msg');
+if (isOwnMessage) msgDiv.classList.add('own-msg');
 
-    let finalNick   = (senderNick && senderNick.trim() !== '') ? senderNick.trim() : '';
-    let chosenColor = null;
+let finalNick = (senderNick && senderNick.trim() !== '') ? senderNick.trim() : '';
+let chosenColor = null;
 
-    if (finalNick.length >= 2 && finalNick.charAt(1) === '.') {
-        const colorPrefix = finalNick.charAt(0).toLowerCase();
-        const colorMap = {
-            'r': '#ff4444',
-            'g': '#00e676',
-            'b': '#29b6f6',
-            'y': '#ffee55',
-            'p': '#f475ff',
-            'o': '#ffa726',
-            'v': '#ab47bc',
-            'c': '#00e5ff',
-            'w': '#ffffff'
-        };
-        if (colorMap[colorPrefix]) {
-            chosenColor = colorMap[colorPrefix];
-            finalNick   = finalNick.substring(2);
-        }
-    }
+if (finalNick.length >= 2 && finalNick.charAt(1) === '.') {
+const colorPrefix = finalNick.charAt(0).toLowerCase();
+const colorMap = {
+'r': '#ff0303',
+'g': '#0fff27',
+'b': '#0f7fff',
+'y': '#ffff0f',
+'p': '#ff0fcf',
+'o': '#ff730f',
+'v': '#970fff',
+'c': '#03eaff',
+'w': '#ffffff'
+};
+if (colorMap[colorPrefix]) {
+chosenColor = colorMap[colorPrefix];
+finalNick = finalNick.substring(2);
+}
+}
 
-    if (replyData) {
-        const replyContainer = document.createElement('div');
-        replyContainer.className = 'reply-container';
-        const replyLine    = document.createElement('div');
-        replyLine.className = 'reply-line';
-        const replyPreview  = document.createElement('div');
-        replyPreview.className = 'reply-preview-text';
+if (replyData) {
+const replyContainer = document.createElement('div');
+replyContainer.className = 'reply-container';
+const replyLine = document.createElement('div');
+replyLine.className = 'reply-line';
+const replyPreview = document.createElement('div');
+replyPreview.className = 'reply-preview-text';
 
-        if (replyData.nick && replyData.nick.trim() !== '') {
-            let cleanReplyNick = replyData.nick.trim();
-            if (cleanReplyNick.length >= 2 && cleanReplyNick.charAt(1) === '.') cleanReplyNick = cleanReplyNick.substring(2);
-            const badgeSpan     = document.createElement('span');
-            badgeSpan.className = 'reply-nick-badge';
-            badgeSpan.innerText = cleanReplyNick;
-            const textSpan      = document.createElement('span');
-            textSpan.innerText  = replyData.text;
-            replyPreview.appendChild(badgeSpan);
-            replyPreview.appendChild(textSpan);
-        } else {
-            replyPreview.innerText = replyData.text;
-        }
+if (replyData.nick && replyData.nick.trim() !== '') {
+let cleanReplyNick = replyData.nick.trim();
+if (cleanReplyNick.length >= 2 && cleanReplyNick.charAt(1) === '.') cleanReplyNick = cleanReplyNick.substring(2);
+const badgeSpan = document.createElement('span');
+badgeSpan.className = 'reply-nick-badge';
+badgeSpan.innerText = cleanReplyNick;
+const textSpan = document.createElement('span');
+textSpan.innerText = replyData.text;
+replyPreview.appendChild(badgeSpan);
+replyPreview.appendChild(textSpan);
+} else {
+replyPreview.innerText = replyData.text;
+}
 
-        replyContainer.appendChild(replyLine);
-        replyContainer.appendChild(replyPreview);
+replyContainer.appendChild(replyLine);
+replyContainer.appendChild(replyPreview);
 
-        if (replyData.targetId) {
-            replyContainer.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const targetMsg = document.getElementById(replyData.targetId);
-                if (targetMsg) {
-                    targetMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    targetMsg.classList.add('msg-flash');
-                    setTimeout(() => targetMsg.classList.remove('msg-flash'), 800);
-                }
-            });
-        }
+if (replyData.targetId) {
+replyContainer.addEventListener('click', (e) => {
+e.stopPropagation();
+const targetMsg = document.getElementById(replyData.targetId);
+if (targetMsg) {
+targetMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+targetMsg.classList.add('msg-flash');
+setTimeout(() => targetMsg.classList.remove('msg-flash'), 800);
+}
+});
+}
 
-        msgDiv.appendChild(replyContainer);
-        lastSenderNick = null;
-    }
+msgDiv.appendChild(replyContainer);
+lastSenderNick = null;
+}
 
-    if (finalNick !== '' && finalNick !== lastSenderNick) {
-        const nickDiv          = document.createElement('div');
-        nickDiv.style.fontWeight = '700';
-        nickDiv.style.fontSize   = '13px';
-        nickDiv.style.marginBottom = '2px';
+if (finalNick !== '' && finalNick !== lastSenderNick) {
+const nickDiv = document.createElement('div');
+nickDiv.style.fontWeight = '700';
+nickDiv.style.fontSize = '13px';
+nickDiv.style.marginBottom = '2px';
 
-        if (chosenColor) {
-            nickDiv.style.color = chosenColor;
-        } else {
-            if      (finalNick.toLowerCase() === 'piar')   nickDiv.style.color = '#00e5ff';
-            else if (finalNick.toLowerCase() === 'sistem') nickDiv.style.color = '#ff0000';
-            else if (finalNick.toLowerCase() === 'bless')  nickDiv.style.color = '#f475ff';
-            else                                            nickDiv.style.color = '#ccc';
-        }
+if (chosenColor) {
+nickDiv.style.color = chosenColor;
+} else {
+if (finalNick.toLowerCase() === 'piar') nickDiv.style.color = '#03eaff';
+else if (finalNick.toLowerCase() === 'sistem') nickDiv.style.color = '#ff0000';
+else if (finalNick.toLowerCase() === 'bless') nickDiv.style.color = '#ff03f2';
+else nickDiv.style.color = '#ccc';
+}
 
-        nickDiv.innerText = finalNick;
-        msgDiv.appendChild(nickDiv);
-        lastSenderNick = finalNick;
-    } else if (finalNick === '') {
-        lastSenderNick = null;
-    }
+nickDiv.innerText = finalNick;
+msgDiv.appendChild(nickDiv);
+lastSenderNick = finalNick;
+} else if (finalNick === '') {
+lastSenderNick = null;
+}
 
-    const textDiv       = document.createElement('div');
-    textDiv.className   = 'msg-body';
-    textDiv.innerHTML   = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+const textDiv = document.createElement('div');
+textDiv.className = 'msg-body';
+textDiv.innerHTML = text.replace(/**(.*?)**/g, '<b>$`1</b>');
 
-    textDiv.addEventListener('click', () => {
-        if (Date.now() - lastCancelTime < 300) return;
-        const activeNick = (senderNick && senderNick.trim() !== '') ? senderNick : '';
-        replyingTo = { text: text, nick: activeNick, targetId: messageId };
-        replyBarText.innerText = finalNick
-            ? `${finalNick} kullanıcısına yanıt veriliyor...`
-            : `Mesaja yanıt veriliyor...`;
-        replyBar.style.display = 'flex';
-        adjustInputHeight();
-        messageInput.focus();
-    });
+textDiv.addEventListener('click', () => {
+if (Date.now() - lastCancelTime < 300) return;
+const activeNick = (senderNick && senderNick.trim() !== '') ? senderNick : '';
+replyingTo = { text: text, nick: activeNick, targetId: messageId };
+replyBarText.innerText = finalNick
+? ``${finalNick} kullanıcısına yanıt veriliyor...:Mesaja yanıt veriliyor...`;
+replyBar.style.display = 'flex';
+adjustInputHeight();
+messageInput.focus();
+});
 
-    msgDiv.appendChild(textDiv);
-    chatArea.appendChild(msgDiv);
+msgDiv.appendChild(textDiv);
+chatArea.appendChild(msgDiv);
 
-    while (chatArea.getElementsByClassName('msg').length > 200) {
-        chatArea.removeChild(chatArea.getElementsByClassName('msg')[0]);
-    }
+while (chatArea.getElementsByClassName('msg').length > 200) {
+chatArea.removeChild(chatArea.getElementsByClassName('msg')[0]);
+}
 
-    setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 30);
-    return messageId;
+setTimeout(() => { chatArea.scrollTop = chatArea.scrollHeight; }, 30);
+return messageId;
 }
 
 function adjustInputHeight() {
-    messageInput.style.height = '50px';
-    if (messageInput.scrollHeight > 50) {
-        messageInput.style.height = Math.min(150, messageInput.scrollHeight) + 'px';
-    }
+messageInput.style.height = '50px';
+if (messageInput.scrollHeight > 50) {
+messageInput.style.height = Math.min(150, messageInput.scrollHeight) + 'px';
+}
 
-    const inputAreaHeight = inputArea.offsetHeight;
-    const viewportHeight  = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-    const keyboardHeight  = window.innerHeight - viewportHeight;
+const inputAreaHeight = inputArea.offsetHeight;
+const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+const keyboardHeight = window.innerHeight - viewportHeight;
 
-    typingIndicator.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
+typingIndicator.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
 
-    if (replyingTo) {
-        replyBar.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
-    }
+if (replyingTo) {
+replyBar.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
+}
 
-    chatArea.style.bottom = (keyboardHeight + inputAreaHeight + TYPING_BAR_HEIGHT) + 'px';
-    chatArea.scrollTop    = chatArea.scrollHeight;
+chatArea.style.bottom = (keyboardHeight + inputAreaHeight + TYPING_BAR_HEIGHT) + 'px';
+chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 messageInput.addEventListener('input', () => {
-    adjustInputHeight();
-    if (conn && conn.open) {
-        if (!isTypingSent) { conn.send({ type: 'typing' }); isTypingSent = true; }
-        if (myTypingTimeout) clearTimeout(myTypingTimeout);
-        myTypingTimeout = setTimeout(() => {
-            if (conn && conn.open) conn.send({ type: 'typing-stop' });
-            isTypingSent = false;
-        }, 2000);
-    }
+adjustInputHeight();
+if (conn && conn.open) {
+if (!isTypingSent) { conn.send({ type: 'typing' }); isTypingSent = true; }
+if (myTypingTimeout) clearTimeout(myTypingTimeout);
+myTypingTimeout = setTimeout(() => {
+if (conn && conn.open) conn.send({ type: 'typing-stop' });
+isTypingSent = false;
+}, 2000);
+}
 });
 
 function closeReplyBar() {
-    replyingTo             = null;
-    replyBar.style.display = 'none';
-    adjustInputHeight();
+replyingTo = null;
+replyBar.style.display = 'none';
+adjustInputHeight();
 }
 
 cancelReplyBtn.addEventListener('pointerdown', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    lastCancelTime = Date.now();
-    closeReplyBar();
-    setTimeout(() => { messageInput.focus(); }, 10);
+event.preventDefault();
+event.stopPropagation();
+event.stopImmediatePropagation();
+lastCancelTime = Date.now();
+closeReplyBar();
+setTimeout(() => { messageInput.focus(); }, 10);
 });
 
 function sendMessage() {
-    const textToSend  = messageInput.value.trim();
-    const currentNick = nickInput.value.trim();
+const textToSend = messageInput.value.trim();
+const currentNick = nickInput.value.trim();
 
-    if (textToSend !== '') {
-        if (myTypingTimeout) clearTimeout(myTypingTimeout);
-        if (conn && conn.open && isTypingSent) conn.send({ type: 'typing-stop' });
-        isTypingSent = false;
+if (textToSend !== '') {
+if (myTypingTimeout) clearTimeout(myTypingTimeout);
+if (conn && conn.open && isTypingSent) conn.send({ type: 'typing-stop' });
+isTypingSent = false;
 
-        const myMsgId     = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-        const messageData = { text: textToSend, senderNick: currentNick, reply: replyingTo, msgId: myMsgId };
+const myMsgId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+const messageData = { text: textToSend, senderNick: currentNick, reply: replyingTo, msgId: myMsgId };
 
-        if (conn && conn.open) conn.send(messageData);
-        appendMessage(textToSend, currentNick, true, replyingTo, myMsgId);
-        closeReplyBar();
-        messageInput.value = '';
-        adjustInputHeight();
-    }
+if (conn && conn.open) conn.send(messageData);
+appendMessage(textToSend, currentNick, true, replyingTo, myMsgId);
+closeReplyBar();
+messageInput.value = '';
+adjustInputHeight();
+}
 }
 
 sendBtn.addEventListener('pointerdown', (event) => {
-    event.preventDefault();
-    sendMessage();
-    setTimeout(() => { messageInput.focus(); }, 10);
+event.preventDefault();
+sendMessage();
+setTimeout(() => { messageInput.focus(); }, 10);
 });
 
 /* --- GÜNCELLENEN KEYDOWN EVENTİ: FİZİKSEL KLAVYE & SQUASHING ENTER --- */
 messageInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        // Shift tuşuna basılıyorsa her koşulda alt satıra geçmesine izin ver
-        if (event.shiftKey) return;
+if (event.key === 'Enter') {
+// Shift tuşuna basılıyorsa her koşulda alt satıra geçmesine izin ver
+if (event.shiftKey) return;
 
-        // Hem dokunmatik destekli hem de dar ekranlı (mobil sanal klavye) kontrolü
-        const isMobileVirtualKeyboard = ('ontouchstart' in window) && (window.innerWidth <= 768);
-        
-        if (isMobileVirtualKeyboard) {
-            // Sadece telefon/tablet sanal klavyesiyse Enter varsayılan işlevini (alt satır) yapsın
-            return;
-        }
+// Hem dokunmatik destekli hem de dar ekranlı (mobil sanal klavye) kontrolü
+const isMobileVirtualKeyboard = ('ontouchstart' in window) && (window.innerWidth <= 768);
 
-        // Masaüstünde veya fiziksel klavyeli tablette Enter doğrudan mesajı gönderir
-        event.preventDefault();
-        sendMessage();
-    }
+if (isMobileVirtualKeyboard) {
+// Sadece telefon/tablet sanal klavyesiyse Enter varsayılan işlevini (alt satır) yapsın
+return;
+}
+
+// Masaüstünde veya fiziksel klavyeli tablette Enter doğrudan mesajı gönderir
+event.preventDefault();
+sendMessage();
+}
 });
 
 document.addEventListener('keydown', (event) => {
-    if (event.key === 'Tab') {
-        if (messageInput.disabled) return;
-        const activeElement = document.activeElement;
-        if (event.shiftKey) {
-            if (activeElement === nickInput) { event.preventDefault(); messageInput.focus(); }
-        } else {
-            if (activeElement === messageInput) { event.preventDefault(); nickInput.focus(); }
-        }
-    }
+if (event.key === 'Tab') {
+if (messageInput.disabled) return;
+const activeElement = document.activeElement;
+if (event.shiftKey) {
+if (activeElement === nickInput) { event.preventDefault(); messageInput.focus(); }
+} else {
+if (activeElement === messageInput) { event.preventDefault(); nickInput.focus(); }
+}
+}
 });
 
 if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', adjustInputHeight);
+window.visualViewport.addEventListener('resize', adjustInputHeight);
 }
 </script>
 </body>
