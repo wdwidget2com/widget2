@@ -18,7 +18,8 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Lexend', sans-serif; }
 html, body { height: 100%; background: #000; color: #fff; overflow: hidden; }
-body { position: relative; }
+body { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+#app { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; background: #000; }
 
 /* ---------- KURULUM EKRANI ---------- */
 #setup-panel {
@@ -32,10 +33,10 @@ body { position: relative; }
 
 /* ---------- DURUM ÇUBUĞU ---------- */
 #status-bar {
-  position: fixed; top: 0; left: 0; width: 100%; height: 28px;
+  flex: 0 0 28px; height: 28px;
   display: none; align-items: center; justify-content: space-between;
   padding: 0 15px; background: #000; border-bottom: 1px solid #1a1a1a;
-  z-index: 9997; font-size: 12px; color: #888;
+  font-size: 12px; color: #888;
 }
 #status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #ff4444; margin-right: 8px; }
 #status-dot.ok { background: #00e676; }
@@ -43,7 +44,7 @@ body { position: relative; }
 
 /* ---------- SOHBET ALANI ---------- */
 #chat-area {
-  position: absolute; top: 28px; left: 0; right: 0; bottom: 106px;
+  flex: 1 1 auto; min-height: 0;
   overflow-y: auto; padding: 8px 0;
   display: none; flex-direction: column; gap: 2px;
   font-size: 18px; line-height: 1.4;
@@ -60,9 +61,9 @@ body { position: relative; }
 
 /* ---------- YAZMA ALANI ---------- */
 #input-area {
-  position: fixed; bottom: 0; left: 0; width: 100%; min-height: 80px;
+  flex: 0 0 auto; width: 100%; min-height: 80px;
   padding: 15px; background: #000; border-top: 1px solid #222;
-  z-index: 9999; display: none; align-items: flex-end;
+  display: none; align-items: flex-end;
 }
 #input-wrapper { display: flex; width: 100%; align-items: flex-end; }
 #nick-input {
@@ -93,7 +94,7 @@ body { position: relative; }
 #reply-bar {
   display: none; background: #111; border-top: 1px solid #222; padding: 8px 15px;
   font-size: 13px; color: #888; justify-content: space-between; align-items: center;
-  position: fixed; width: 100%; z-index: 10001;
+  flex: 0 0 auto; width: 100%;
 }
 #cancel-reply-btn { cursor: pointer; color: #fff; font-weight: bold; padding: 0 5px; }
 .reply-nick-badge {
@@ -104,7 +105,7 @@ body { position: relative; }
 /* ---------- "YENİ MESAJ YOLDA" ---------- */
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
 #typing-indicator {
-  display: none; position: fixed; left: 0; width: 100%; z-index: 9998; height: 26px;
+  flex: 0 0 26px; display: none; width: 100%; height: 26px;
   padding: 0 15px; background: #000; border-top: 1px solid #1a1a1a; align-items: center; pointer-events: none;
 }
 #typing-indicator span { font-size: 12px; color: #555; opacity: 0; transition: opacity 0.2s; }
@@ -118,6 +119,8 @@ body { position: relative; }
 </style>
 </head>
 <body>
+
+<div id="app">
 
 <!-- Kurulum: sadece ilk açılışta görünür -->
 <div id="setup-panel">
@@ -142,10 +145,12 @@ body { position: relative; }
 <div id="input-area">
   <div id="input-wrapper">
     <input type="text" id="nick-input" placeholder="İsim" tabindex="1">
-    <textarea id="message-input" placeholder="Bağlanıyor..." disabled tabindex="2"></textarea>
+    <textarea id="message-input" placeholder="Bağlanıyor..." tabindex="2"></textarea>
     <button id="send-btn" disabled>➔</button>
   </div>
 </div>
+
+</div><!-- /app -->
 
 <script>
 /* =====================================================
@@ -173,8 +178,7 @@ const replyBar       = document.getElementById('reply-bar');
 const replyBarText   = document.getElementById('reply-bar-text');
 const cancelReplyBtn = document.getElementById('cancel-reply-btn');
 
-const STATUS_BAR_HEIGHT  = 28;
-const TYPING_BAR_HEIGHT  = 26;
+const appEl = document.getElementById('app');
 const ID_REGEX = /^[A-Za-z0-9]([A-Za-z0-9_-]*[A-Za-z0-9])?$/;
 
 /* =====================================================
@@ -216,7 +220,6 @@ function setStatus(text, ok) {
 }
 
 function setChatEnabled(enabled) {
-  messageInput.disabled = !enabled;
   sendBtn.disabled = !enabled;
   messageInput.placeholder = enabled ? 'Yazın...' : 'Bağlanıyor...';
 }
@@ -527,21 +530,28 @@ function adjustInputHeight() {
     messageInput.style.height = Math.min(150, messageInput.scrollHeight) + 'px';
   }
 
-  const inputAreaHeight = inputArea.offsetHeight;
-  const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  const keyboardHeight = Math.max(0, window.innerHeight - viewportHeight);
-
-  typingIndicator.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
-  if (replyingTo) replyBar.style.bottom = (keyboardHeight + inputAreaHeight) + 'px';
-
-  chatArea.style.top = STATUS_BAR_HEIGHT + 'px';
-  chatArea.style.bottom = (keyboardHeight + inputAreaHeight + TYPING_BAR_HEIGHT) + 'px';
+  fitToViewport();
   chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+// Tüm uygulamayı ekranın GÖRÜNEN kısmına (klavye hariç) oturtur
+function fitToViewport() {
+  const vv = window.visualViewport;
+  if (vv) {
+    appEl.style.top = vv.offsetTop + 'px';
+    appEl.style.height = vv.height + 'px';
+  } else {
+    appEl.style.top = '0px';
+    appEl.style.height = window.innerHeight + 'px';
+  }
 }
 
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', adjustInputHeight);
+  window.visualViewport.addEventListener('scroll', fitToViewport);
 }
+window.addEventListener('resize', adjustInputHeight);
+fitToViewport();
 
 /* =====================================================
    YAZMA / GÖNDERME
@@ -575,7 +585,8 @@ cancelReplyBtn.addEventListener('pointerdown', (event) => {
 function sendMessage() {
   const textToSend = messageInput.value.trim();
   const currentNick = nickInput.value.trim();
-  if (textToSend === '' || !isConnected()) return;
+  if (textToSend === '') return;
+  if (!isConnected()) { setStatus('Bağlı değil, mesaj gönderilmedi', false); return; }
 
   if (myTypingTimeout) clearTimeout(myTypingTimeout);
   if (isTypingSent) conn.send({ type: 'typing-stop' });
